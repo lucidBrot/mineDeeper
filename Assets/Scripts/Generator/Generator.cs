@@ -28,6 +28,12 @@ namespace Assets.Scripts.Generator
                 PlaceBombRandomlyOnBoard(board);
             }
 
+            if (!(new Solver.Solver(board)).IsSolvable())
+            {
+                // retry randomly
+                board = Generate(boardWidth, boardHeight, boardDepth, numBombs);
+            }
+
             return board;
         }
 
