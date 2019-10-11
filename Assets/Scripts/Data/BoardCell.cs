@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class BoardCell
 {
+    /// <summary>
+    /// My summary.
+    /// </summary>
     public int PosX { get; }
 
     public int PosY { get; }
