@@ -14,19 +14,24 @@ namespace Assets.Scripts.Generator
         {
         }
 
-        public Board Generate (int boardWidth, int boardHeight, int boardDepth, int numBombs)
+        public Board Generate (uint boardWidth, uint boardHeight, uint boardDepth, uint numBombs)
         {
-            Board board = new Board(boardWidth, boardHeight, boardDepth);
-
-            for (int bombCount = 0; bombCount < numBombs; bombCount++)
+            if (boardWidth * boardHeight * boardDepth < numBombs)
             {
-                PlaceBombOnBoard(board);
+                throw new ArgumentException("Number of bombs is larger than the Board");
+            }
+
+            Board board = new Board((int)boardWidth, (int)boardHeight, (int)boardDepth);
+
+            for (uint bombCount = 0; bombCount < numBombs; bombCount++)
+            {
+                PlaceBombRandomlyOnBoard(board);
             }
 
             return board;
         }
 
-        private void PlaceBombOnBoard(Board board)
+        private void PlaceBombRandomlyOnBoard(Board board)
         {
             int posx = Random.Range(0, board.Width);
             int posy = Random.Range(0, board.Height);
@@ -34,7 +39,15 @@ namespace Assets.Scripts.Generator
             BoardCell cell = board.Cells[posx, posy, posz];
             Debug.Assert(cell.PosX == posx && cell.PosY==posy && cell.PosZ == posz, "Eric confused the order of axes");
 
-            board.SetBombState(posx, posy, posz, true);
+            if (board.Cells[posx, posy, posz].IsBomb)
+            {
+                // try again with different random values
+                PlaceBombRandomlyOnBoard(board);
+            }
+            else
+            {
+                board.SetBombState(posx, posy, posz, true);
+            }
         }
     }
 }
