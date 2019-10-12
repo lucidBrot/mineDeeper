@@ -27,7 +27,8 @@ namespace Assets.Scripts.Solver
                 Compute();
             }
 
-            return solvable.Value;
+            //TODO: return solvable.Value;
+            return false;
         }
 
         private void Compute()
