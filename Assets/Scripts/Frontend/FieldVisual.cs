@@ -8,11 +8,15 @@ public class FieldVisual : MonoBehaviour
 {
     public GameObject TextContainer;
 
-    public GameObject FlagContainer;
-
     public GameObject CubeVisual;
 
     public GameObject OutlineVisual;
+
+    public Material DefaultFieldMaterial;
+
+    public Material UnknownFieldMaterial;
+
+    public Material SuspectedFieldMaterial;
 
     private BoardCell boardCell;
 
@@ -53,24 +57,40 @@ public class FieldVisual : MonoBehaviour
             return;
         }
 
-        if (FlagContainer != null)
-        {
-            FlagContainer.SetActive(!boardCell.IsRevealed && boardCell.IsSuspect);
-        }
-
         if (CubeVisual != null)
         {
-            CubeVisual.SetActive(!boardCell.IsRevealed);
+            if (boardCell.State == CellState.Revealed)
+            {
+                CubeVisual.SetActive(false);
+            }
+            else
+            {
+                CubeVisual.SetActive(true);
+                var cubeRenderer = CubeVisual.GetComponent<Renderer>();
+
+                switch (boardCell.State)
+                {
+                    case CellState.Default:
+                        cubeRenderer.sharedMaterial = DefaultFieldMaterial;
+                        break;
+                    case CellState.Suspected:
+                        cubeRenderer.sharedMaterial = SuspectedFieldMaterial;
+                        break;
+                    case CellState.Unknown:
+                        cubeRenderer.sharedMaterial = UnknownFieldMaterial;
+                        break;
+                }
+            }
         }
 
         if (OutlineVisual != null)
         {
-            OutlineVisual.SetActive(boardCell.IsRevealed && !boardCell.IsNude);
+            OutlineVisual.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude);
         }
 
         if (TextContainer != null)
         {
-            TextContainer.SetActive(boardCell.IsRevealed && !boardCell.IsNude);
+            TextContainer.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude);
 
             var text = boardCell.IsNude ? string.Empty : boardCell.AdjacentBombCount.ToString();
             var textObjects = TextContainer.GetComponentsInChildren<TextMeshPro>();

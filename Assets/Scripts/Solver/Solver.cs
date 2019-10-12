@@ -63,7 +63,7 @@ namespace Assets.Scripts.Solver
                 // they are all bombs
                 foreach (BoardCell bomb in possibleBombs)
                 {
-                    bomb.IsSuspect = true;
+                    bomb.State = true;
                 }
             }
         }
