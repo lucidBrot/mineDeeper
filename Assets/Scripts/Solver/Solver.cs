@@ -109,6 +109,7 @@ namespace Assets.Scripts.Solver
                     {
                         c.State = CellState.Suspect;
                         hasChanges = true;
+                        numUnfoundBombs--;
                     }
                 });
 
