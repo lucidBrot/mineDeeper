@@ -15,9 +15,12 @@ namespace Assets.Scripts.Solver
         private const int NUM_NEIGHBORS = 26;
         private bool? solvable;
 
+        private int numUnfoundBombs;
+
         public Solver(Board board)
         {
             this.board = board;
+            this.numUnfoundBombs = board.BombCount;
         }
 
         public bool IsSolvable()
@@ -55,6 +58,7 @@ namespace Assets.Scripts.Solver
                 if (!neighbor.IsRevealed)
                 {
                     possibleBombs.Add(neighbor);
+                    numUnfoundBombs--;
                 }
             }
 
@@ -63,7 +67,7 @@ namespace Assets.Scripts.Solver
                 // they are all bombs
                 foreach (BoardCell bomb in possibleBombs)
                 {
-                    bomb.IsSuspect = true;
+                    bomb.IsSuspect = true; // TODO: do NOT modify initial board
                 }
             }
         }
