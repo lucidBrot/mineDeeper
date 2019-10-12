@@ -61,5 +61,24 @@ namespace Assets.Scripts.Tests
             Solver.Solver solver = new Solver.Solver(board);
             Assert.AreEqual(true, solver.IsSolvable(), "Should be solvable using a simple rule: all neighbors are bombs");
         }
+
+        [Test]
+        public void TinaTest()
+        {
+            /*
+             * ? ? ? ?
+             * ? 7 7 ?
+             * ? ? ? ?
+             */
+            Board board = new Board(4,3,1);
+            foreach (BoardCell cell in board.Cells)
+            {
+                board.SetBombState(cell.PosX, cell.PosY, cell.PosZ, true);
+            }
+            board.SetBombState(1, 1, 0, false);
+            board.SetBombState(2,1,0,false);
+            board.get(1, 1, 0).IsRevealed = true;
+            board.get(2, 1, 0).IsRevealed = true;
+        }
     }
 }
