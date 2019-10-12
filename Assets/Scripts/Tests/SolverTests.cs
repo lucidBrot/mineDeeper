@@ -79,6 +79,20 @@ namespace Assets.Scripts.Tests
             board.SetBombState(2,1,0,false);
             board.get(1, 1, 0).State = CellState.Revealed;
             board.get(2, 1, 0).State = CellState.Revealed;
+
+            Solver.Solver solver = new Solver.Solver(board);
+            Assert.True(solver.IsSolvable());
+        }
+
+        [Test]
+        public void NoraTest()
+        {
+            // A cube with no bombs and one revealed
+            Board board = new Board(4,4,4);
+            board.get(3, 2, 2).State = CellState.Revealed;
+
+            Solver.Solver solver = new Solver.Solver(board);
+            Assert.True(solver.IsSolvable());
         }
     }
 }
