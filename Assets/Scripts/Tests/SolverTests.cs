@@ -32,7 +32,33 @@ namespace Assets.Scripts.Tests
         [Test]
         public void KevinExampleSolvable()
         {
+            /* Solution:    Given:      Num bombs: 10
+             * x 5 x        ? 5 ?
+             * x x x        ? ? ?
+             * x 8 x        ? 8 ?
+             * x x x        ? ? ?
+             */
+            Board board = new Board(3, 4, 1);
+            board.SetBombState(0,0,0, true);
+            board.SetBombState(2,0,0,true);
 
+            board.SetBombState(0,1,0, true);
+            board.SetBombState(1,1,0,true);
+            board.SetBombState(2,1,0,true);
+
+            board.SetBombState(0,2,0,true);
+            board.SetBombState(2,2,0,true);
+
+            board.SetBombState(0,3,0, true);
+            board.SetBombState(1, 3, 0, true);
+            board.SetBombState(2, 3, 0, true);
+
+            board.get(1, 0, 0).IsRevealed = true;
+            board.get(1, 2, 0).IsRevealed = true;
+
+            Assert.AreEqual(10, board.BombCount, "Wrong number of bombs!");
+
+            Solver.Solver solver = new Solver.Solver(board);
         }
     }
 }
