@@ -14,6 +14,14 @@ namespace Assets.Scripts.Generator
         {
         }
 
+        /// <summary>
+        /// Generates a board with an arbitrary initial guess. Tries to solve that board, and if that works, returns it.
+        /// </summary>
+        /// <param name="boardWidth"></param>
+        /// <param name="boardHeight"></param>
+        /// <param name="boardDepth"></param>
+        /// <param name="numBombs"></param>
+        /// <returns></returns>
         public Board Generate (uint boardWidth, uint boardHeight, uint boardDepth, uint numBombs)
         {
             if (boardWidth * boardHeight * boardDepth < numBombs)

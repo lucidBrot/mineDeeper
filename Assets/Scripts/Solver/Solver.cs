@@ -23,6 +23,10 @@ namespace Assets.Scripts.Solver
             this.numUnfoundBombs = board.BombCount;
         }
 
+        /// <summary>
+        /// Expects a board that already offers information to the player.
+        /// </summary>
+        /// <returns>True if the board is solvable without guessing, False otherwise</returns>
         public bool IsSolvable()
         {
             if (solvable == null)
