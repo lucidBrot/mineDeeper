@@ -40,7 +40,6 @@ namespace Assets.Scripts.Generator
             if (disableSolving)
             {
                 return board;
-
             }
 
             // compute whether it is a solvable board
@@ -50,6 +49,7 @@ namespace Assets.Scripts.Generator
                 board = Generate(boardWidth, boardHeight, boardDepth, numBombs);
             }
 
+            board.resetAllCellStates();
             return board;
         }
 

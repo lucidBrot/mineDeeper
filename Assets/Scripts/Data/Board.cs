@@ -98,4 +98,12 @@ public class Board
     {
         return this.Cells[otherCell.PosX, otherCell.PosY, otherCell.PosZ];
     }
+
+    public void resetAllCellStates()
+    {
+        foreach (BoardCell cell in Cells)
+        {
+            cell.State = CellState.Default;
+        }
+    }
 }
