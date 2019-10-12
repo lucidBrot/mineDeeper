@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Assets.Scripts.Data
 {
-    public class Board
+    public class Board : IEnumerable<BoardCell>
     {
         public int Width { get; }
 
@@ -14,6 +16,7 @@ namespace Assets.Scripts.Data
 
         public int BombCount { get; set; }
 
+        [DebuggerDisplay("{this[0]}")]
         public BoardCell this[int x, int y, int z]
         {
             get { return Cells[x + y * Width + z * Width * Height]; }
@@ -95,11 +98,6 @@ namespace Assets.Scripts.Data
             return neighbors;
         }
 
-        public BoardCell get(int posX, int posY, int posZ)
-        {
-            return this[posX, posY, posZ];
-        }
-
         public void ResetCellStates()
         {
             foreach (var cell in Cells)
@@ -116,6 +114,16 @@ namespace Assets.Scripts.Data
                 cell.AdjacentBombCount = 0;
                 cell.State = CellState.Default;
             }
+        }
+
+        public IEnumerator<BoardCell> GetEnumerator()
+        {
+            return ((IEnumerable<BoardCell>)Cells).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

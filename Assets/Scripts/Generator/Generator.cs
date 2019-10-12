@@ -103,9 +103,9 @@ namespace Assets.Scripts.Generator
             int posx = Random.Range(0, board.Width);
             int posy = Random.Range(0, board.Height);
             int posz = Random.Range(0, board.Depth);
-            BoardCell cell = board.get(posx, posy, posz);
+            BoardCell cell = board[posx, posy, posz];
 
-            if (board.get(posx, posy, posz).IsBomb)
+            if (board[posx, posy, posz].IsBomb)
             {
                 // try again with different random values
                 PlaceBombRandomlyOnBoard(board);
