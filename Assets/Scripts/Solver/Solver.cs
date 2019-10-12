@@ -12,6 +12,7 @@ namespace Assets.Scripts.Solver
     class Solver
     {
         private readonly Board board;
+        private readonly Board noteBoard;
         private const int NUM_NEIGHBORS = 26;
         private bool? solvable;
 
@@ -20,6 +21,7 @@ namespace Assets.Scripts.Solver
         public Solver(Board board)
         {
             this.board = board;
+            this.noteBoard = new Board(board.Width, board.Height, board.Depth);
             this.numUnfoundBombs = board.BombCount;
         }
 
@@ -54,7 +56,7 @@ namespace Assets.Scripts.Solver
             List<BoardCell> possibleBombs = new List<BoardCell>();
             foreach (BoardCell neighbor in board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ))
             {
-                if (neighbor.IsRevealed && !neighbor.IsBomb)
+                if (neighbor.IsRevealed)
                 {
                     revealedSafeCells++;
                 }
@@ -71,7 +73,8 @@ namespace Assets.Scripts.Solver
                 // they are all bombs
                 foreach (BoardCell bomb in possibleBombs)
                 {
-                    bomb.IsSuspect = true; // TODO: do NOT modify initial board
+                    BoardCell noteBomb = noteBoard.Cells[bomb.PosX, bomb.PosY, bomb.PosZ];
+                    noteBomb.IsSuspect = true; // TODO: do NOT modify initial board
                 }
             }
         }
