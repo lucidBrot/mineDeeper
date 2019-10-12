@@ -80,6 +80,10 @@ namespace Assets.Scripts.GameLogic
         /// </summary>
         [Range(0f, 1f)] public float ZoomMovementImpact = 0.5f;
 
+        public GameObject CenterMarker;
+
+        public Texture2D GrabCursor;
+
         /// <summary>
         ///     The get axis.
         /// </summary>
@@ -187,6 +191,16 @@ namespace Assets.Scripts.GameLogic
                     var point = cameraForward * zoom;
                     grabPlane = new Plane(-cameraForward, point);
                 }
+
+                if (CenterMarker != null)
+                {
+                    CenterMarker.SetActive(true);
+                }
+
+                if (GrabCursor != null)
+                {
+                    Cursor.SetCursor(GrabCursor, GrabCursor.texelSize / 2f, CursorMode.Auto);
+                }
             }
 
             if (Input.GetKey(GrabTriggerKey))
@@ -200,6 +214,19 @@ namespace Assets.Scripts.GameLogic
                 var prevGrabPosition = prevRay.origin + prevRay.direction * prevDist;
                 movement += prevGrabPosition - grabPosition;
                 prevMousePos = mousePosition;
+            }
+
+            if (Input.GetKeyUp(GrabTriggerKey))
+            {
+                if (CenterMarker != null) 
+                {
+                    CenterMarker.SetActive(false);
+                }
+
+                if (GrabCursor != null)
+                {
+                    Cursor.SetCursor(null, GrabCursor.texelSize / 2f, CursorMode.Auto);
+                }
             }
 
             var newPos = transform.position + movement;

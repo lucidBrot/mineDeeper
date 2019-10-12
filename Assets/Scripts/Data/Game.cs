@@ -32,7 +32,7 @@ namespace Assets.Scripts.Data
             NextBoardWidth = 10;
             NextBoardHeight = 10;
             NextBoardDepth = 10;
-            NextBombCount = 20;
+            NextBombCount = 50;
         }
 
         public void StartNewGame()
