@@ -44,9 +44,9 @@ namespace Assets.Scripts.Solver
             int computationEverAdvanced = 0;
             while (this.numUnfoundBombs > 0)
             {
+                computationAdvancedThisTurn = false;
                 foreach (BoardCell cell in this.board.Cells)
                 {
-                    computationAdvancedThisTurn = false;
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreBombs(cell);
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell);
                     // TODO: consider no neighbors are bombs
