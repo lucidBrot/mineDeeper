@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Assets.Scripts.Data;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Generator
@@ -30,7 +26,7 @@ namespace Assets.Scripts.Generator
                 throw new ArgumentException("Number of bombs is larger than the Board");
             }
 
-            Board board = new Board((int)boardWidth, (int)boardHeight, (int)boardDepth);
+            var board = new Board((int)boardWidth, (int)boardHeight, (int)boardDepth);
 
             for (uint bombCount = 0; bombCount < numBombs; bombCount++)
             {
@@ -43,14 +39,29 @@ namespace Assets.Scripts.Generator
                 return board;
             }
 
-            // compute whether it is a solvable board
-            if (!(new Solver.Solver(board)).IsSolvable())
+            var solver = new Solver.Solver(board);
+            var tries = 0;
+
+            while (!solver.IsSolvable())
             {
-                // retry randomly
-                board = Generate(boardWidth, boardHeight, boardDepth, numBombs);
+                tries++;
+
+                if (tries > 20)
+                {
+                    throw new EricException();
+                }
+
+                Debug.Log("Trying again, round " + tries);
+
+                board.ResetBoard();
+
+                for (var i = 0u; i < numBombs; i++)
+                {
+                    PlaceBombRandomlyOnBoard(board);
+                }
             }
 
-            board.resetAllCellStates();
+            board.ResetCellStates();
             return board;
         }
 
@@ -60,7 +71,6 @@ namespace Assets.Scripts.Generator
             int posy = Random.Range(0, board.Height);
             int posz = Random.Range(0, board.Depth);
             BoardCell cell = board.get(posx, posy, posz);
-            Debug.Assert(cell.PosX == posx && cell.PosY==posy && cell.PosZ == posz, "Eric confused the order of axes");
 
             if (board.get(posx, posy, posz).IsBomb)
             {

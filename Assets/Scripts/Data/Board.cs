@@ -94,15 +94,20 @@ namespace Assets.Scripts.Data
             return this.Cells[posX, posY, posZ];
         }
 
-        public BoardCell getAt(BoardCell otherCell)
+        public void ResetCellStates()
         {
-            return this.Cells[otherCell.PosX, otherCell.PosY, otherCell.PosZ];
+            foreach (var cell in Cells)
+            {
+                cell.State = CellState.Default;
+            }
         }
 
-        public void resetAllCellStates()
+        public void ResetBoard()
         {
-            foreach (BoardCell cell in Cells)
+            foreach (var cell in Cells)
             {
+                cell.IsBomb = false;
+                cell.AdjacentBombCount = 0;
                 cell.State = CellState.Default;
             }
         }

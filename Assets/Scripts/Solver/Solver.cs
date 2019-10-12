@@ -30,44 +30,29 @@ namespace Assets.Scripts.Solver
         /// <returns>True if the board is solvable without guessing, False otherwise</returns>
         public bool IsSolvable()
         {
-            if (solvable == null)
-            {
-                Compute();
-            }
-
-            //TODO: return solvable.Value;
-            return solvable.Value;
+            return Compute();
         }
 
-        private void Compute()
+        private bool Compute()
         {
-            bool computationAdvancedThisTurn = false;
-            int computationEverAdvanced = 0;
             while (this.numUnfoundBombs > 0)
             {
-                computationAdvancedThisTurn = false;
+                var computationAdvancedThisTurn = false;
                 foreach (BoardCell cell in this.board.Cells)
                 {
                     computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell);
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell);
-                    // TODO: consider no neighbors are bombs
                     // TODO: consider more rules (without breaking if modified)
-                }
-
-                if (computationAdvancedThisTurn)
-                {
-                    computationEverAdvanced++;
                 }
 
                 if (!computationAdvancedThisTurn)
                 {
-                    this.solvable = computationEverAdvanced > 0;
-                    return;
+                    return numUnfoundBombs == 0;
                 }
             }
 
             // we reached this point without any guesses and have found all bombs
-            this.solvable = true;
+            return true;
         }
 
         /// <summary>

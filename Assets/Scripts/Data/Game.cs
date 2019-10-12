@@ -39,7 +39,7 @@ namespace Assets.Scripts.Data
         {
             var generator = new Generator.Generator();
             GameBoard = generator.Generate((uint) NextBoardWidth, (uint) NextBoardHeight, (uint) NextBoardDepth,
-                (uint) NextBombCount, true);
+                (uint) NextBombCount);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
