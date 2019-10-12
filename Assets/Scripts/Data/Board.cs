@@ -57,6 +57,8 @@ public class Board
         {
             neighbor.AdjacentBombCount += modifier;
         }
+
+        this.BombCount += modifier;
     }
 
     public List<BoardCell> GetAdjacentCells(int posX, int posY, int posZ)

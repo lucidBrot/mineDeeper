@@ -22,7 +22,7 @@ namespace Assets.Scripts.Generator
         /// <param name="boardDepth"></param>
         /// <param name="numBombs"></param>
         /// <returns></returns>
-        public Board Generate (uint boardWidth, uint boardHeight, uint boardDepth, uint numBombs)
+        public Board Generate (uint boardWidth, uint boardHeight, uint boardDepth, uint numBombs, bool disableSolving = false)
         {
             if (boardWidth * boardHeight * boardDepth < numBombs)
             {
@@ -36,6 +36,14 @@ namespace Assets.Scripts.Generator
                 PlaceBombRandomlyOnBoard(board);
             }
 
+            // return early for tests that are afraid of endless retries (i.e. tests that don't care about the solver)
+            if (disableSolving)
+            {
+                return board;
+
+            }
+
+            // compute whether it is a solvable board
             if (!(new Solver.Solver(board)).IsSolvable())
             {
                 // retry randomly

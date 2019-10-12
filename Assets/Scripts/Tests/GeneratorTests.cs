@@ -14,7 +14,7 @@ namespace Assets.Scripts.Tests
         {
             // Use the Assert class to test conditions
             Generator.Generator generator = new Generator.Generator();
-            Board board = generator.Generate(10, 4, 8, numBombs);
+            Board board = generator.Generate(10, 4, 8, numBombs, disableSolving:true);
             
             // count bombs
             uint bombSum = 0;
