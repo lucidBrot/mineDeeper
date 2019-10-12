@@ -88,6 +88,12 @@ namespace Assets.Scripts.Solver
         /// <returns>Whether the noteBoard has been modified</returns>
         private bool ConsiderAllNeighborsAreBombs(BoardCell cell)
         {
+            // skip cells we know nothing of
+            if (cell.State!=CellState.Revealed)
+            {
+                return false;
+            }
+
             int revealedSafeCells = 0;
             List<BoardCell> possibleBombs = new List<BoardCell>();
             foreach (BoardCell neighbor in board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ))
