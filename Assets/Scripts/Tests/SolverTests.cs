@@ -14,7 +14,7 @@ namespace Assets.Scripts.Tests
             /*
              * Solution:     Given (with num bombs = 3)
              * x x 1 0       o o 1 o
-             * x 3 1 0       o 3 o o
+             * x 3 1 0       o 3 1 o
              * 1 1 0 0       1 1 o o
              */
             Board testBoard = new Board(4,3,1);

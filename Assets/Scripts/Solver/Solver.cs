@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Assets.Scripts.Data;
+using Assets.Scripts.GameLogic;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -47,7 +48,7 @@ namespace Assets.Scripts.Solver
                 computationAdvancedThisTurn = false;
                 foreach (BoardCell cell in this.board.Cells)
                 {
-                    computationAdvancedThisTurn |= ConsiderAllNeighborsAreBombs(cell);
+                    computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell);
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell);
                     // TODO: consider no neighbors are bombs
                     // TODO: consider more rules (without breaking if modified)
@@ -76,13 +77,12 @@ namespace Assets.Scripts.Solver
         /// <returns>Whether the noteBoard has been modified during this call</returns>
         private bool ConsiderAllNeighborsAreSafe(BoardCell cell)
         {
-            List<BoardCell> neighbors = board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ);
-            int numAdjacentSafeCells = neighbors.Count(c => c.State == CellState.Revealed);
-            if (cell.AdjacentBombCount - numAdjacentSafeCells == 0 && numAdjacentSafeCells != neighbors.Count)
+            if (cell.IsNude)
             {
-                // all adjacent unrevealed cells are safe
-                neighbors.ForEach(c => c.State = CellState.Revealed);
-                return true;
+                var hadUnrevealed = false;
+                board.ForEachNeighbor(cell, c => hadUnrevealed |= c.State != CellState.Revealed);
+                board.Reveal(cell);
+                return hadUnrevealed;
             }
 
             return false;
@@ -93,42 +93,38 @@ namespace Assets.Scripts.Solver
         /// </summary>
         /// <param name="cell"></param>
         /// <returns>Whether the noteBoard has been modified</returns>
-        private bool ConsiderAllNeighborsAreBombs(BoardCell cell)
+        private bool ConsiderAllHiddenNeighborsAreBombs(BoardCell cell)
         {
-            // skip cells we know nothing of
-            if (cell.State!=CellState.Revealed)
+            // skip cells we know nothing of and nude cells
+            if (cell.State != CellState.Revealed || cell.IsNude)
             {
                 return false;
             }
 
-            int revealedSafeCells = 0;
-            List<BoardCell> possibleBombs = new List<BoardCell>();
-            foreach (BoardCell neighbor in board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ))
-            {
-                if (neighbor.State == CellState.Revealed)
-                {
-                    revealedSafeCells++;
-                }
+            var unrevealedNeighborAmount = 0;
 
-                if (neighbor.State != CellState.Revealed)
-                {
-                    possibleBombs.Add(neighbor);
-                }
-            }
-
-            if (revealedSafeCells + cell.AdjacentBombCount == board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ).Count)
+            board.ForEachNeighbor(cell, c =>
             {
-                // they are all bombs. Take note on the noteBoard
-                foreach (BoardCell bomb in possibleBombs)
+                if (c.State != CellState.Revealed)
                 {
-                    if (bomb.State != CellState.Suspect)
+                    unrevealedNeighborAmount++;
+                }
+            });
+
+            if (cell.AdjacentBombCount == unrevealedNeighborAmount)
+            {
+                var hasChanges = false;
+
+                board.ForEachNeighbor(cell, c =>
+                {
+                    if (c.State != CellState.Revealed && c.State != CellState.Suspect)
                     {
-                        bomb.State = CellState.Suspect;
-                        numUnfoundBombs--;
+                        c.State = CellState.Suspect;
+                        hasChanges = true;
                     }
-                }
-                
-                return true;
+                });
+
+                return hasChanges;
             }
 
             return false;
