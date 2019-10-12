@@ -107,5 +107,17 @@ namespace Assets.Scripts.Tests
             Solver.Solver solver = new Solver.Solver(board);
             Assert.True(solver.IsSolvable());
         }
+
+        [Test]
+        public void MinimalTest()
+        {
+            // A cube with no bombs and one revealed
+            Board board = new Board(1,1,2);
+            board.get(0,0,0).State = CellState.Revealed;
+            board.SetBombState(0, 0, 1, true);
+
+            Solver.Solver solver = new Solver.Solver(board);
+            Assert.True(solver.IsSolvable());
+        }
     }
 }
