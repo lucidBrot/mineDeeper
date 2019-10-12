@@ -2,32 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Assets.Scripts.Generator;
 using JetBrains.Annotations;
+using Unity_Tools.Core;
 using UnityEngine;
 
-public class Game : MonoBehaviour, INotifyPropertyChanged
+public class Game : SingletonBehaviour<Game>, INotifyPropertyChanged
 {
-    private static Game instance;
     private Board gameBoard;
-
-    public static Game Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                var go = GameObject.Find("Singleton Container");
-                if (go == null)
-                {
-                    go = new GameObject("Singleton Container");
-                }
-
-                instance = go.AddComponent<Game>();
-            }
-
-            return instance;
-        }
-    }
 
     public Board GameBoard
     {
@@ -40,22 +22,27 @@ public class Game : MonoBehaviour, INotifyPropertyChanged
         }
     }
 
-    private void OnEnable()
+    public int NextBoardWidth { get; set; }
+
+    public int NextBoardHeight { get; set; }
+
+    public int NextBoardDepth { get; set; }
+
+    public int NextBombCount { get; set; }
+
+    public Game()
     {
-        if (instance != null && instance != this)
-        {
-            Debug.LogError("Singleton instance of Game already exists, removing new instance.");
-            Destroy(this);
-            return;
-        }
+        NextBoardWidth = 10;
+        NextBoardHeight = 10;
+        NextBoardDepth = 10;
+        NextBombCount = 20;
     }
 
-    private void OnDestroy()
+    public void StartNewGame()
     {
-        if (instance == this)
-        {
-            instance = null;
-        }
+        var generator = new Generator();
+        GameBoard = generator.Generate((uint) NextBoardWidth, (uint) NextBoardHeight, (uint) NextBoardDepth,
+            (uint) NextBombCount);
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

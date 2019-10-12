@@ -7,8 +7,7 @@ using UnityEngine;
 
 public class BoardCell : INotifyPropertyChanged
 {
-    private bool isRevealed;
-    private bool isSuspect;
+    private CellState state;
 
     /// <summary>
     /// My summary.
@@ -27,25 +26,14 @@ public class BoardCell : INotifyPropertyChanged
     /// It is naked, has no value and is basically useless for the game.
     /// </summary>
     public bool IsNude => AdjacentBombCount == 0;
-
-    public bool IsRevealed
+    
+    public CellState State
     {
-        get => isRevealed;
+        get => state;
         set
         {
-            if (value == isRevealed) return;
-            isRevealed = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool IsSuspect
-    {
-        get => isSuspect;
-        set
-        {
-            if (value == isSuspect) return;
-            isSuspect = value;
+            if (value == state) return;
+            state = value;
             OnPropertyChanged();
         }
     }
@@ -55,6 +43,10 @@ public class BoardCell : INotifyPropertyChanged
         this.PosX = posX;
         this.PosY = posY;
         this.PosZ = posZ;
+
+        AdjacentBombCount = 0;
+        IsBomb = false;
+        State = CellState.Default;
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -64,4 +56,29 @@ public class BoardCell : INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
+    
+}
+
+public enum CellState
+{
+    /// <summary>
+    /// Unrevealed, not suspected, not unknown.
+    /// </summary>
+    Default,
+
+    /// <summary>
+    /// Revealed, not suspected, not unknown.
+    /// </summary>
+    Revealed,
+
+    /// <summary>
+    /// Unrevealed, suspected, not unknown.
+    /// </summary>
+    Suspected,
+
+    /// <summary>
+    /// Unrevealed, not suspected, unknown.
+    /// </summary>
+    Unknown
 }
