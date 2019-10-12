@@ -97,7 +97,6 @@ namespace Assets.Scripts.Solver
                 return false;
             }
 
-            board.Cells.First<BoardCell>(c => c != null);
             var unrevealedNeighborAmount = board.CountNeighbors(cell, c => c.State != CellState.Revealed);
 
             if (cell.AdjacentBombCount == unrevealedNeighborAmount)
