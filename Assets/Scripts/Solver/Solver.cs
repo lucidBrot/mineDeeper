@@ -14,8 +14,6 @@ namespace Assets.Scripts.Solver
     public class Solver
     {
         private readonly Board board;
-        private bool? solvable;
-
         private int numUnfoundBombs;
 
         public Solver(Board board)

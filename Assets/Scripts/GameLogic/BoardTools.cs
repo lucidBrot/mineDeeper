@@ -12,17 +12,21 @@ namespace Assets.Scripts.GameLogic
     {
         public static void Reveal(this Board board, BoardCell cell)
         {
-            if (cell.State != CellState.Default)
-            {
-                return;
-            }
-
             cell.State = CellState.Revealed;
 
             if (cell.IsNude)
             {
-                board.ForEachNeighbor(cell, board.Reveal);
+                board.ForEachNeighbor(cell, board.SecondaryReveal);
             }
+        }
+
+        private static void SecondaryReveal(this Board board, BoardCell cell)
+        {
+            if (cell.State != CellState.Default)
+            {
+                return;
+            }
+            board.Reveal(cell);
         }
 
         public static void ForEachNeighbor(this Board board, BoardCell cell, Action<BoardCell> action)
