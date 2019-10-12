@@ -13,10 +13,6 @@ namespace Assets.Scripts.Solver
     public class Solver
     {
         private readonly Board board;
-        /// <summary>
-        /// A writeable board that has flags for found bombs as <c>IsSuspect</c> and updates <see cref="BoardCell.AdjacentBombCount"/>
-        /// </summary>
-        private readonly Board noteBoard;
         private bool? solvable;
 
         private int numUnfoundBombs;
@@ -24,7 +20,6 @@ namespace Assets.Scripts.Solver
         public Solver(Board board)
         {
             this.board = board;
-            this.noteBoard = new Board(board.Width, board.Height, board.Depth);
             this.numUnfoundBombs = board.BombCount;
         }
 
@@ -52,6 +47,7 @@ namespace Assets.Scripts.Solver
                 {
                     computationAdvanced = false;
                     computationAdvanced |= ConsiderAllNeighborsAreBombs(cell);
+                    computationAdvanced |= ConsiderAllNeighborsAreSafe(cell);
                     // TODO: consider no neighbors are bombs
                     // TODO: consider more rules (without breaking if modified)
                 }
@@ -68,13 +64,37 @@ namespace Assets.Scripts.Solver
         }
 
         /// <summary>
-        /// 
+        /// if the number of adjacent uncertainties equals 0, every uncertainty is safe
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns>Whether the noteBoard has been modified during this call</returns>
+        private bool ConsiderAllNeighborsAreSafe(BoardCell cell)
+        {
+            List<BoardCell> neighbors = board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ);
+            int numAdjacentSafeCells = neighbors.Count(c => c.State == CellState.Revealed);
+            if (cell.AdjacentBombCount - numAdjacentSafeCells == 0 && numAdjacentSafeCells != neighbors.Count)
+            {
+                // all adjacent unrevealed cells are safe
+                neighbors.ForEach(c => c.State = CellState.Revealed);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// if the number of adjacent uncertainties equals the number on the cell, every uncertainty is a bomb
         /// </summary>
         /// <param name="cell"></param>
         /// <returns>Whether the noteBoard has been modified</returns>
         private bool ConsiderAllNeighborsAreBombs(BoardCell cell)
         {
-            // if the number of adjacent uncertainties equals the number on the cell, every uncertainty is a bomb
+            // skip cells we know nothing of
+            if (cell.State!=CellState.Revealed)
+            {
+                return false;
+            }
+
             int revealedSafeCells = 0;
             List<BoardCell> possibleBombs = new List<BoardCell>();
             foreach (BoardCell neighbor in board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ))
@@ -87,7 +107,6 @@ namespace Assets.Scripts.Solver
                 if (neighbor.State != CellState.Revealed)
                 {
                     possibleBombs.Add(neighbor);
-                    numUnfoundBombs--;
                 }
             }
 
@@ -96,11 +115,13 @@ namespace Assets.Scripts.Solver
                 // they are all bombs. Take note on the noteBoard
                 foreach (BoardCell bomb in possibleBombs)
                 {
-                    BoardCell noteBomb = noteBoard.getAt(bomb);
-                    noteBomb.State = CellState.Suspect; 
+                    if (bomb.State != CellState.Suspect)
+                    {
+                        bomb.State = CellState.Suspect;
+                        numUnfoundBombs--;
+                    }
                 }
-                // cell has no more unfound bombs around it
-                noteBoard.BombCount = 0;
+                
                 return true;
             }
 
