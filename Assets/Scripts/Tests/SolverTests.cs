@@ -7,7 +7,7 @@ namespace Assets.Scripts.Tests
 {
     class SolverTests
     {
-        [Test]
+        [Test, Timeout(2000)]
         public void HerbertExampleSolvable()
         {
             /*

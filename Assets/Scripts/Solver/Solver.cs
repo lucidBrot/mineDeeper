@@ -69,7 +69,15 @@ namespace Assets.Scripts.Solver
         /// <returns>Whether the noteBoard has been modified during this call</returns>
         private bool ConsiderAllNeighborsAreSafe(BoardCell cell)
         {
-            //TODO
+            List<BoardCell> neighbors = board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ);
+            int numAdjacentSafeCells = neighbors.Count(c => c.State == CellState.Revealed);
+            if (cell.AdjacentBombCount - numAdjacentSafeCells == 0 && numAdjacentSafeCells != neighbors.Count)
+            {
+                // all adjacent unrevealed cells are safe
+                neighbors.ForEach(c => c.State = CellState.Revealed);
+                return true;
+            }
+
             return false;
         }
 
