@@ -42,6 +42,7 @@ namespace Assets.Scripts.Solver
                     Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
                     computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell);
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell);
+                    computationAdvancedThisTurn |= ConsiderTheLackOfRemainingAdjacentBombs(cell);
                     // TODO: consider more rules (without breaking if modified)
                 }
 
@@ -53,6 +54,29 @@ namespace Assets.Scripts.Solver
 
             // we reached this point without any guesses and have found all bombs
             return true;
+        }
+
+        /// <summary>
+        /// If there are already N suspects among the neighbors of the cell, then the remaining neighbors are all clean and can be revealed.
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
+        private bool ConsiderTheLackOfRemainingAdjacentBombs(BoardCell cell)
+        {
+            int numSurroundingSuspects = board.CountNeighbors(cell, n => n.State == CellState.Suspect);
+            if (numSurroundingSuspects == cell.AdjacentBombCount)
+            {
+                board.ForEachNeighbor(cell, neighbor =>
+                {
+                    if (neighbor.State != CellState.Suspect)
+                    {
+                        board.Reveal(neighbor);
+                    }
+                });
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
