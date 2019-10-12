@@ -51,6 +51,7 @@ namespace Assets.Scripts.Solver
                 {
                     computationAdvanced = false;
                     computationAdvanced |= ConsiderAllNeighborsAreBombs(cell);
+                    computationAdvanced |= ConsiderAllNeighborsAreSafe(cell);
                     // TODO: consider no neighbors are bombs
                     // TODO: consider more rules (without breaking if modified)
                 }
@@ -67,13 +68,23 @@ namespace Assets.Scripts.Solver
         }
 
         /// <summary>
-        /// 
+        /// if the number of adjacent uncertainties equals 0, every uncertainty is safe
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns>Whether the noteBoard has been modified during this call</returns>
+        private bool ConsiderAllNeighborsAreSafe(BoardCell cell)
+        {
+            //TODO
+            return false;
+        }
+
+        /// <summary>
+        /// if the number of adjacent uncertainties equals the number on the cell, every uncertainty is a bomb
         /// </summary>
         /// <param name="cell"></param>
         /// <returns>Whether the noteBoard has been modified</returns>
         private bool ConsiderAllNeighborsAreBombs(BoardCell cell)
         {
-            // if the number of adjacent uncertainties equals the number on the cell, every uncertainty is a bomb
             int revealedSafeCells = 0;
             List<BoardCell> possibleBombs = new List<BoardCell>();
             foreach (BoardCell neighbor in board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ))
@@ -86,7 +97,6 @@ namespace Assets.Scripts.Solver
                 if (neighbor.State != CellState.Revealed)
                 {
                     possibleBombs.Add(neighbor);
-                    numUnfoundBombs--;
                 }
             }
 
@@ -96,7 +106,8 @@ namespace Assets.Scripts.Solver
                 foreach (BoardCell bomb in possibleBombs)
                 {
                     BoardCell noteBomb = noteBoard.getAt(bomb);
-                    noteBomb.State = CellState.Suspect; 
+                    noteBomb.State = CellState.Suspect;
+                    numUnfoundBombs--;
                 }
                 // cell has no more unfound bombs around it
                 noteBoard.BombCount = 0;
