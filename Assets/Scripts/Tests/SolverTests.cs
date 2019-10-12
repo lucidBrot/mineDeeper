@@ -59,6 +59,7 @@ namespace Assets.Scripts.Tests
             Assert.AreEqual(10, board.BombCount, "Wrong number of bombs!");
 
             Solver.Solver solver = new Solver.Solver(board);
+            Assert.AreEqual(true, solver.IsSolvable(), "Should be solvable using a simple rule: all neighbors are bombs");
         }
     }
 }
