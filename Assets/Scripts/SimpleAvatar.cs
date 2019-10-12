@@ -1,27 +1,28 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class SimpleAvatar : MonoBehaviour
+namespace Assets.Scripts
 {
-    public string Layername;
-
-    public Vector3 Offset;
-
-    // Update is called once per frame
-    void Update()
+    public class SimpleAvatar : MonoBehaviour
     {
-        var camera = Camera.main;
-        if (camera == null)
-        {
-            return;
-        }
+        public string Layername;
 
-        var ray = camera.ScreenPointToRay(Input.mousePosition);
+        public Vector3 Offset;
 
-        if (Physics.Raycast(ray, out var hit, 9001, LayerMask.GetMask(Layername)))
+        // Update is called once per frame
+        void Update()
         {
-            this.transform.position = hit.point + Offset;
+            var camera = Camera.main;
+            if (camera == null)
+            {
+                return;
+            }
+
+            var ray = camera.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out var hit, 9001, LayerMask.GetMask(Layername)))
+            {
+                this.transform.position = hit.point + Offset;
+            }
         }
     }
 }

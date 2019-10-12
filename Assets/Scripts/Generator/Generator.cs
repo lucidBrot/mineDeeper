@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Assets.Scripts.Data;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Generator

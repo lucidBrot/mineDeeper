@@ -24,13 +24,12 @@
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Unity_Tools.Core
+namespace Assets.Scripts
 {
     /// <summary>
     /// Base class for all MonoBehaviours that need to follow the singleton pattern. 
     /// </summary>
     /// <typeparam name="T">The type of the implementing class. Needed to provide the instance.</typeparam>
-    [ExecuteInEditMode]
     public abstract class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {
         /// <summary>

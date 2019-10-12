@@ -1,83 +1,86 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using Unity_Tools.Core;
+using Assets.Scripts.Data;
+using Assets.Scripts.Frontend;
 using UnityEngine;
 
-public class GameManager : SingletonBehaviour<GameManager>
+namespace Assets.Scripts.GameLogic
 {
-    private readonly List<FieldVisual> fieldVisuals = new List<FieldVisual>();
-
-    public FieldVisual Prefab;
-
-    public Vector3 FieldSize;
-
-    public Vector3 Margin;
-
-    public GameManager()
+    public class GameManager : SingletonBehaviour<GameManager>
     {
-        FieldSize = new Vector3(2, 2, 2);
-        Margin = new Vector3(0.1f, 0.1f, 0.1f);
-    }
+        private readonly List<FieldVisual> fieldVisuals = new List<FieldVisual>();
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        Game.Instance.PropertyChanged += OnGameboardChanged;
-    }
+        public FieldVisual Prefab;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+        public Vector3 FieldSize;
 
-    private void OnGameboardChanged(object sender, PropertyChangedEventArgs e)
-    {
-        DestroyGameField();
-        BuildGameField();
-    }
+        public Vector3 Margin;
 
-    private void DestroyGameField()
-    {
-        foreach (var fieldVisual in fieldVisuals)
+        public GameManager()
         {
-            Destroy(fieldVisual.gameObject);
-        }
-    }
-
-    private void BuildGameField()
-    {
-        var board = Game.Instance.GameBoard;
-
-        if (board == null)
-        {
-            return;
+            FieldSize = new Vector3(2, 2, 2);
+            Margin = new Vector3(0.1f, 0.1f, 0.1f);
         }
 
-        if (fieldVisuals.Capacity < board.Cells.Length)
+        // Start is called before the first frame update
+        void Start()
         {
-            fieldVisuals.Capacity = board.Cells.Length;
+            Game.Instance.PropertyChanged += OnGameboardChanged;
+            Game.Instance.StartNewGame();
         }
 
-        var w = board.Width;
-        var h = board.Height;
-        var d = board.Height;
-
-        var fieldMarginSize = FieldSize + Margin;
-        var worldSize = new Vector3(w * fieldMarginSize.x, h * fieldMarginSize.y, d * fieldMarginSize.z);
-        var startPoint = -worldSize / 2f;
-
-        for(var x = 0; x < w; x++)
+        private void OnGameboardChanged(object sender, PropertyChangedEventArgs e) 
         {
-            for (var y = 0; y < h; y++)
+            DestroyGameField();
+            BuildGameField();
+        }
+
+        private void DestroyGameField()
+        {
+            foreach (var fieldVisual in fieldVisuals)
             {
-                for (var z = 0; z < d; z++)
-                {
-                    var cell = board.Cells[x, y, z];
+                Destroy(fieldVisual.gameObject);
+            }
 
-                    var instance = Instantiate(Prefab);
-                    instance.BoardCell = cell;
+            fieldVisuals.Clear();
+        }
+
+        private void BuildGameField()
+        {
+            var board = Game.Instance.GameBoard;
+
+            if (board == null)
+            {
+                return;
+            }
+
+            if (fieldVisuals.Capacity < board.Cells.Length)
+            {
+                fieldVisuals.Capacity = board.Cells.Length;
+            }
+
+            var w = board.Width;
+            var h = board.Height;
+            var d = board.Height;
+
+            var fieldMarginSize = FieldSize + Margin;
+            var worldSize = new Vector3(w * fieldMarginSize.x, h * fieldMarginSize.y, d * fieldMarginSize.z);
+            var startPoint = -worldSize / 2f;
+
+            for(var x = 0; x < w; x++)
+            {
+                for (var y = 0; y < h; y++)
+                {
+                    for (var z = 0; z < d; z++)
+                    {
+                        var cell = board.Cells[x, y, z];
+
+                        var instance = Instantiate(Prefab);
+                        instance.BoardCell = cell;
+                        instance.transform.position = startPoint + new Vector3(x * fieldMarginSize.x, y * fieldMarginSize.y,
+                                                          z * fieldMarginSize.z);
+                        fieldVisuals.Add(instance);
+                    }
                 }
             }
         }
