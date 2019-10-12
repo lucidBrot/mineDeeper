@@ -65,11 +65,25 @@ namespace Assets.Scripts.Generator
             }
 
             board.ResetCellStates();
+            SeedFirstNude(board);
             return board;
         }
 
         private void SeedFirstNude(Board board)
         {
+            // if possible, choose a cell at the surface
+            BoardCell nude = board.FirstOrDefault(cell => cell.IsNude && (
+                                    cell.PosX == 0 || cell.PosY == 0 || cell.PosZ == 0
+                                    || cell.PosX == board.Width-1 || cell.PosY == board.Height-1 ||
+                                    cell.PosZ == board.Depth-1)
+                                );
+            if (nude != null)
+            {
+                nude.State = CellState.Revealed;
+                return;
+            }
+
+            Debug.Log("Did not find surface nudes.");
             bool foundNude = false;
             foreach (BoardCell cell in board.Cells)
             {
