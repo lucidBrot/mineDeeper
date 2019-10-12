@@ -13,7 +13,7 @@ namespace Assets.Scripts.Solver
     {
         private readonly Board board;
         private readonly Board noteBoard;
-        private const int NUM_NEIGHBORS = 26;
+        private const int NUM_NEIGHBORS = 3*3*3-1;
         private bool? solvable;
 
         private int numUnfoundBombs;
@@ -73,7 +73,7 @@ namespace Assets.Scripts.Solver
                 // they are all bombs
                 foreach (BoardCell bomb in possibleBombs)
                 {
-                    BoardCell noteBomb = noteBoard.Cells[bomb.PosX, bomb.PosY, bomb.PosZ];
+                    BoardCell noteBomb = noteBoard.getAt(bomb);
                     noteBomb.IsSuspect = true; // TODO: do NOT modify initial board
                 }
             }
