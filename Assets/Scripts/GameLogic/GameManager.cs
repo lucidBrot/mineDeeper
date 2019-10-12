@@ -73,7 +73,7 @@ namespace Assets.Scripts.GameLogic
                 {
                     for (var z = 0; z < d; z++)
                     {
-                        var cell = board.Cells[x, y, z];
+                        var cell = board[x, y, z];
 
                         var instance = Instantiate(Prefab);
                         instance.BoardCell = cell;

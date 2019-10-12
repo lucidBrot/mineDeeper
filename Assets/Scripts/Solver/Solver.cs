@@ -40,6 +40,8 @@ namespace Assets.Scripts.Solver
                 var computationAdvancedThisTurn = false;
                 foreach (BoardCell cell in this.board.Cells)
                 {
+                    Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
+                    Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
                     computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell);
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell);
                     // TODO: consider more rules (without breaking if modified)
@@ -62,11 +64,20 @@ namespace Assets.Scripts.Solver
         /// <returns>Whether the noteBoard has been modified during this call</returns>
         private bool ConsiderAllNeighborsAreSafe(BoardCell cell)
         {
+            if (cell.State != CellState.Revealed)
+            {
+                return false;
+            }
+
             if (cell.IsNude)
             {
                 var hadUnrevealed = false;
                 board.ForEachNeighbor(cell, c => hadUnrevealed |= c.State != CellState.Revealed);
-                board.Reveal(cell);
+                if (hadUnrevealed)
+                {
+                    board.Reveal(cell);
+                }
+
                 return hadUnrevealed;
             }
 
@@ -86,15 +97,8 @@ namespace Assets.Scripts.Solver
                 return false;
             }
 
-            var unrevealedNeighborAmount = 0;
-
-            board.ForEachNeighbor(cell, c =>
-            {
-                if (c.State != CellState.Revealed)
-                {
-                    unrevealedNeighborAmount++;
-                }
-            });
+            board.Cells.First<BoardCell>(c => c != null);
+            var unrevealedNeighborAmount = board.CountNeighbors(cell, c => c.State != CellState.Revealed);
 
             if (cell.AdjacentBombCount == unrevealedNeighborAmount)
             {

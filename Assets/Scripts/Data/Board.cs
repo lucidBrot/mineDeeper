@@ -10,9 +10,15 @@ namespace Assets.Scripts.Data
 
         public int Depth { get; }
 
-        public BoardCell[,,] Cells { get; }
+        public BoardCell[] Cells { get; }
 
         public int BombCount { get; set; }
+
+        public BoardCell this[int x, int y, int z]
+        {
+            get { return Cells[x + y * Width + z * Width * Height]; }
+            private set { Cells[x + y * Width + z * Width * Height] = value; }
+        }
 
         public Board(int width, int height, int depth)
         {
@@ -20,7 +26,7 @@ namespace Assets.Scripts.Data
             this.Height = height;
             this.Depth = depth;
 
-            this.Cells = new BoardCell[width, height, depth];
+            this.Cells = new BoardCell[width * height * depth];
 
             for (var x = 0; x < width; x++)
             {
@@ -28,7 +34,7 @@ namespace Assets.Scripts.Data
                 {
                     for (var z = 0; z < depth; z++)
                     {
-                        this.Cells[x, y, z] = new BoardCell(x, y, z);
+                        this[x, y, z] = new BoardCell(x, y, z);
                     }
                 }
             }
@@ -44,7 +50,7 @@ namespace Assets.Scripts.Data
         /// <param name="isBomb"></param>
         public void SetBombState(int posX, int posY, int posZ, bool isBomb)
         {
-            BoardCell cell = this.Cells[posX, posY, posZ];
+            BoardCell cell = this[posX, posY, posZ];
             bool prev = cell.IsBomb;
             if (prev == isBomb)
             {
@@ -80,7 +86,7 @@ namespace Assets.Scripts.Data
                             z >= 0 && z < this.Depth      )
                         {
                             // if not the cell itself
-                            if (!(xx == 0 && yy == 0 && zz == 0)) { neighbors.Add(this.Cells[x,y,z]);}
+                            if (!(xx == 0 && yy == 0 && zz == 0)) { neighbors.Add(this[x,y,z]);}
                         }
                     }
                 }
@@ -91,7 +97,7 @@ namespace Assets.Scripts.Data
 
         public BoardCell get(int posX, int posY, int posZ)
         {
-            return this.Cells[posX, posY, posZ];
+            return this[posX, posY, posZ];
         }
 
         public void ResetCellStates()

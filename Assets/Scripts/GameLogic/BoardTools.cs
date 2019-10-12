@@ -64,10 +64,24 @@ namespace Assets.Scripts.GameLogic
                             continue;
                         }
 
-                        action(board.Cells[indX, indY, indZ]);
+                        action(board[indX, indY, indZ]);
                     }
                 }
             }
+        }
+
+        public static int CountNeighbors(this Board board, BoardCell cell, Func<BoardCell, bool> predicate)
+        {
+            var count = 0;
+            board.ForEachNeighbor(cell, c =>
+            {
+                if (predicate(c))
+                {
+                    count++;
+                }
+            });
+
+            return count;
         }
     }
 }
