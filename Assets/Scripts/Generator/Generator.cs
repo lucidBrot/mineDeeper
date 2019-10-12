@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Assets.Scripts.Data;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -32,6 +33,7 @@ namespace Assets.Scripts.Generator
             {
                 PlaceBombRandomlyOnBoard(board);
             }
+            SeedFirstNude(board);
 
             // return early for tests that are afraid of endless retries (i.e. tests that don't care about the solver)
             if (disableSolving)
@@ -59,10 +61,41 @@ namespace Assets.Scripts.Generator
                 {
                     PlaceBombRandomlyOnBoard(board);
                 }
+                SeedFirstNude(board);
             }
 
             board.ResetCellStates();
             return board;
+        }
+
+        private void SeedFirstNude(Board board)
+        {
+            bool foundNude = false;
+            foreach (BoardCell cell in board.Cells)
+            {
+                if (cell.IsNude)
+                {
+                    cell.State = CellState.Revealed;
+                    foundNude = true;
+                    break;
+                }
+            }
+
+            if (!foundNude)
+            {
+                // no nudes available. use any non-bomb
+                foreach (BoardCell cell in board.Cells)
+                {
+                    if (!cell.IsBomb)
+                    {
+                        cell.State = CellState.Revealed;
+                        return;
+                    }
+                }
+
+                // only bombs available!
+                throw new EricException();
+            }
         }
 
         private void PlaceBombRandomlyOnBoard(Board board)
