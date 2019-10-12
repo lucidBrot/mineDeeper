@@ -13,6 +13,8 @@ namespace Assets.Scripts.Frontend
 
         public GameObject OutlineVisual;
 
+        public GameObject BombVisual;
+
         public Material DefaultFieldMaterial;
 
         public Material UnknownFieldMaterial;
@@ -82,6 +84,11 @@ namespace Assets.Scripts.Frontend
                             break;
                     }
                 }
+            }
+
+            if (BombVisual != null)
+            {
+                BombVisual.SetActive(boardCell.IsBomb && boardCell.State == CellState.Revealed);
             }
 
             if (OutlineVisual != null)
