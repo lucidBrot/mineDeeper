@@ -40,21 +40,27 @@ namespace Assets.Scripts.Solver
 
         private void Compute()
         {
-            bool computationAdvanced = false;
+            bool computationAdvancedThisTurn = false;
+            int computationEverAdvanced = 0;
             while (this.numUnfoundBombs > 0)
             {
                 foreach (BoardCell cell in this.board.Cells)
                 {
-                    computationAdvanced = false;
-                    computationAdvanced |= ConsiderAllNeighborsAreBombs(cell);
-                    computationAdvanced |= ConsiderAllNeighborsAreSafe(cell);
+                    computationAdvancedThisTurn = false;
+                    computationAdvancedThisTurn |= ConsiderAllNeighborsAreBombs(cell);
+                    computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell);
                     // TODO: consider no neighbors are bombs
                     // TODO: consider more rules (without breaking if modified)
                 }
 
-                if (!computationAdvanced)
+                if (computationAdvancedThisTurn)
                 {
-                    this.solvable = false;
+                    computationEverAdvanced++;
+                }
+
+                if (!computationAdvancedThisTurn)
+                {
+                    this.solvable = computationEverAdvanced > 0;
                     return;
                 }
             }

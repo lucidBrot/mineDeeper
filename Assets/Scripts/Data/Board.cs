@@ -80,7 +80,7 @@ namespace Assets.Scripts.Data
                             z >= 0 && z < this.Depth      )
                         {
                             // if not the cell itself
-                            if (!(x == 0 && y == 0 && z == 0)) { neighbors.Add(this.Cells[x,y,z]);}
+                            if (!(xx == 0 && yy == 0 && zz == 0)) { neighbors.Add(this.Cells[x,y,z]);}
                         }
                     }
                 }
