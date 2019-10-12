@@ -94,5 +94,17 @@ namespace Assets.Scripts.Tests
             Solver.Solver solver = new Solver.Solver(board);
             Assert.True(solver.IsSolvable());
         }
+
+        [Test]
+        public void BoratTest()
+        {
+            // A cube with no bombs and one revealed
+            Board board = new Board(4, 4, 4);
+            board.get(3, 2, 2).State = CellState.Revealed;
+            board.SetBombState(0,0,0,true);
+
+            Solver.Solver solver = new Solver.Solver(board);
+            Assert.True(solver.IsSolvable());
+        }
     }
 }
