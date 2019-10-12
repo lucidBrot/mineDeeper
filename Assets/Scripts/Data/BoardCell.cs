@@ -75,7 +75,7 @@ public enum CellState
     /// <summary>
     /// Unrevealed, suspected, not unknown.
     /// </summary>
-    Suspected,
+    Suspect,
 
     /// <summary>
     /// Unrevealed, not suspected, unknown.

@@ -78,12 +78,12 @@ namespace Assets.Scripts.Solver
             List<BoardCell> possibleBombs = new List<BoardCell>();
             foreach (BoardCell neighbor in board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ))
             {
-                if (neighbor.IsRevealed)
+                if (neighbor.State == CellState.Revealed)
                 {
                     revealedSafeCells++;
                 }
 
-                if (!neighbor.IsRevealed)
+                if (neighbor.State != CellState.Revealed)
                 {
                     possibleBombs.Add(neighbor);
                     numUnfoundBombs--;
@@ -96,7 +96,7 @@ namespace Assets.Scripts.Solver
                 foreach (BoardCell bomb in possibleBombs)
                 {
                     BoardCell noteBomb = noteBoard.getAt(bomb);
-                    noteBomb.IsSuspect = true; 
+                    noteBomb.State = CellState.Suspect; 
                 }
                 // cell has no more unfound bombs around it
                 noteBoard.BombCount = 0;

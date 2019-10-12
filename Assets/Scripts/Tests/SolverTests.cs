@@ -20,10 +20,10 @@ namespace Assets.Scripts.Tests
             testBoard.SetBombState(0, 0, 0, true);
             testBoard.SetBombState(0, 1, 0, true);
             testBoard.SetBombState(1,0,0,true);
-            testBoard.get(0, 2, 0).IsRevealed = true;
-            testBoard.get(1, 1, 0).IsRevealed = true;
-            testBoard.get(2, 0, 0).IsRevealed = true;
-            testBoard.get(2, 1, 0).IsRevealed = true;
+            testBoard.get(0, 2, 0).State = CellState.Revealed;
+            testBoard.get(1, 1, 0).State = CellState.Revealed;
+            testBoard.get(2, 0, 0).State = CellState.Revealed;
+            testBoard.get(2, 1, 0).State = CellState.Revealed;
             Solver.Solver solver = new Solver.Solver(testBoard);
 
             Assert.AreEqual(true, solver.IsSolvable(), "HerbertExample should be solvable");
@@ -53,8 +53,8 @@ namespace Assets.Scripts.Tests
             board.SetBombState(1, 3, 0, true);
             board.SetBombState(2, 3, 0, true);
 
-            board.get(1, 0, 0).IsRevealed = true;
-            board.get(1, 2, 0).IsRevealed = true;
+            board.get(1, 0, 0).State = CellState.Revealed;
+            board.get(1, 2, 0).State = CellState.Revealed;
 
             Assert.AreEqual(10, board.BombCount, "Wrong number of bombs!");
 
@@ -77,8 +77,8 @@ namespace Assets.Scripts.Tests
             }
             board.SetBombState(1, 1, 0, false);
             board.SetBombState(2,1,0,false);
-            board.get(1, 1, 0).IsRevealed = true;
-            board.get(2, 1, 0).IsRevealed = true;
+            board.get(1, 1, 0).State = CellState.Revealed;
+            board.get(2, 1, 0).State = CellState.Revealed;
         }
     }
 }

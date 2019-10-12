@@ -73,7 +73,7 @@ public class FieldVisual : MonoBehaviour
                     case CellState.Default:
                         cubeRenderer.sharedMaterial = DefaultFieldMaterial;
                         break;
-                    case CellState.Suspected:
+                    case CellState.Suspect:
                         cubeRenderer.sharedMaterial = SuspectedFieldMaterial;
                         break;
                     case CellState.Unknown:
