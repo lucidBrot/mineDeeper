@@ -33,4 +33,57 @@ public class Board
             }
         }
     }
+
+    /// <summary>
+    /// Sets the isBomb flag of the cell at the given position on this Board.
+    /// Also updates the count of adjacent cells to reflect this
+    /// </summary>
+    /// <param name="posX"></param>
+    /// <param name="posY"></param>
+    /// <param name="posZ"></param>
+    /// <param name="isBomb"></param>
+    public void SetBombState(int posX, int posY, int posZ, bool isBomb)
+    {
+        BoardCell cell = this.Cells[posX, posY, posZ];
+        bool prev = cell.IsBomb;
+        if (prev == isBomb)
+        {
+            return;
+        }
+        cell.IsBomb = isBomb;
+        int modifier = isBomb ? 1 : -1;
+
+        foreach (BoardCell neighbor in this.GetAdjacentCells(posX, posY, posZ))
+        {
+            neighbor.AdjacentBombCount += modifier;
+        }
+    }
+
+    public List<BoardCell> GetAdjacentCells(int posX, int posY, int posZ)
+    {
+        List<BoardCell> neighbors = new List<BoardCell>();
+        for (int xx = -1; xx <= 1; xx++)
+        {
+            for (int yy = -1; yy <= 1; yy++)
+            {
+                for (int zz = -1; zz <= 1; zz++)
+                {
+                    int x = posX + xx;
+                    int y = posY + yy;
+                    int z = posZ + zz;
+                    
+                    // if not out of bounds
+                    if (x >= 0 && x < this.Width &&
+                        y >= 0 && y < this.Height &&
+                        z >= 0 && z < this.Depth      )
+                    {
+                        // if not the cell itself
+                        if (!(x == 0 && y == 0 && z == 0)) { neighbors.Add(this.Cells[x,y,z]);}
+                    }
+                }
+            }
+        }
+
+        return neighbors;
+    }
 }
