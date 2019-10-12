@@ -12,6 +12,9 @@ namespace Assets.Scripts.Solver
     class Solver
     {
         private readonly Board board;
+        /// <summary>
+        /// A writeable board that has flags for found bombs as <c>IsSuspect</c> and updates <see cref="BoardCell.AdjacentBombCount"/>
+        /// </summary>
         private readonly Board noteBoard;
         private const int NUM_NEIGHBORS = 3*3*3-1;
         private bool? solvable;
@@ -70,12 +73,14 @@ namespace Assets.Scripts.Solver
 
             if (revealedSafeCells + cell.AdjacentBombCount == NUM_NEIGHBORS)
             {
-                // they are all bombs
+                // they are all bombs. Take note on the noteBoard
                 foreach (BoardCell bomb in possibleBombs)
                 {
                     BoardCell noteBomb = noteBoard.getAt(bomb);
-                    noteBomb.IsSuspect = true; // TODO: do NOT modify initial board
+                    noteBomb.IsSuspect = true; 
                 }
+                // cell has no more unfound bombs around it
+                noteBoard.BombCount = 0;
             }
         }
     }
