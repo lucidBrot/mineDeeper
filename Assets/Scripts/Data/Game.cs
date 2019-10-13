@@ -90,6 +90,17 @@ namespace Assets.Scripts.Data
             {
                 PlayerStats.NumBombsExploded++;
             }
+            TestWhetherHintStillValid();
+        }
+
+        private void TestWhetherHintStillValid()
+        {
+            Hint nextHint = Solver.Solver.Hint(GameBoard);
+            if (!nextHint.IsSameHintAs(PreviousHint))
+            {
+                UILayer.Instance.HintText = "";
+                PreviousHint.CellsToHighlight.ForEach(c => c.Highlighted = false);
+            }
         }
 
         public void RequestHint()
@@ -115,6 +126,7 @@ namespace Assets.Scripts.Data
         {
             cell.ToggleMarking();
             CheckIfGameFinished();
+            TestWhetherHintStillValid();
         }
 
         public void CheckIfGameFinished()
