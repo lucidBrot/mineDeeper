@@ -83,6 +83,8 @@ namespace Assets.Scripts.Frontend
                             cubeRenderer.sharedMaterial = UnknownFieldMaterial;
                             break;
                     }
+
+                    cubeRenderer.sharedMaterial.color = boardCell.Highlighted ? Color.yellow : Color.cyan;
                 }
             }
 
@@ -106,8 +108,12 @@ namespace Assets.Scripts.Frontend
                 foreach (var textObject in textObjects)
                 {
                     textObject.text = text;
+                    textObject.color = boardCell.Highlighted ? Color.yellow : Color.white;
                 }
+
+                
             }
         }
+
     }
 }

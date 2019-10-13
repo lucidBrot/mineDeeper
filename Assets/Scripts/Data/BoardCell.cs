@@ -30,6 +30,8 @@ namespace Assets.Scripts.Data
         /// It is naked, has no value and is basically useless for the game.
         /// </summary>
         public bool IsNude => AdjacentBombCount == 0;
+
+        public bool Highlighted { get; set; }
     
         public CellState State
         {
@@ -81,7 +83,7 @@ namespace Assets.Scripts.Data
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             StringBuilder b = new StringBuilder("Cell(");
             return b.Append(PosX).Append(", ").Append(PosY).Append(", ").Append(PosZ).Append(")").ToString();
