@@ -98,7 +98,7 @@ namespace Assets.Scripts.Data
             Hint nextHint = Solver.Solver.Hint(GameBoard);
             if (!nextHint.IsSameHintAs(PreviousHint))
             {
-                UILayer.Instance.HintText = "";
+                UILayer.Instance.HintText = null;
                 PreviousHint?.CellsToHighlight.ForEach(c => c.Highlighted = false);
             }
         }
