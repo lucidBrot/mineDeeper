@@ -67,7 +67,7 @@ public class UILayer : SingletonBehaviour<UILayer>
 
     public void ShowHint()
     {
-        Game.Instance.RequestHint();
+        Game.Instance.RequestHint(); 
     }
 
     public void RestartGame()
