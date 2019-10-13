@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace Assets.Scripts.Data
     public class BoardCell : INotifyPropertyChanged
     {
         private CellState state;
+        private bool highlighted;
 
         /// <summary>
         /// My summary.
@@ -29,7 +31,18 @@ namespace Assets.Scripts.Data
         /// It is naked, has no value and is basically useless for the game.
         /// </summary>
         public bool IsNude => AdjacentBombCount == 0;
-    
+
+        public bool Highlighted
+        {
+            get => highlighted;
+            set
+            {
+                if (value == highlighted) return;
+                highlighted = value;
+                OnPropertyChanged();
+            }
+        }
+
         public CellState State
         {
             get => state;
@@ -78,6 +91,12 @@ namespace Assets.Scripts.Data
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public override string ToString()
+        {
+            StringBuilder b = new StringBuilder("Cell(");
+            return b.Append(PosX).Append(", ").Append(PosY).Append(", ").Append(PosZ).Append(")").ToString();
         }
     }
 

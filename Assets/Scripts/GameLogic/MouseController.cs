@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Data;
 using Assets.Scripts.Frontend;
 using Assets.Scripts.GameLogic;
+using Assets.Scripts.Solver;
 using UnityEngine;
 
 public class MouseController : MonoBehaviour
@@ -30,6 +31,9 @@ public class MouseController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // print a hint to help debug
+        Debug.Log("Hint: "+Solver.Hint(Game.Instance.GameBoard));
+
         if (keyState == KeyDownState.None)
         {
             if (Input.GetKeyDown(ActivateKey))

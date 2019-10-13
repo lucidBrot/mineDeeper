@@ -21,6 +21,10 @@ namespace Assets.Scripts.Frontend
 
         public Material SuspectedFieldMaterial;
 
+        public Material DefaultFieldMaterialHighlighted;
+        public Material UnknownFieldMaterialHighlighted;
+        public Material SuspectedFieldMaterialHighlighted;
+
         private BoardCell boardCell;
 
         public BoardCell BoardCell
@@ -74,15 +78,16 @@ namespace Assets.Scripts.Frontend
                     switch (boardCell.State)
                     {
                         case CellState.Default:
-                            cubeRenderer.sharedMaterial = DefaultFieldMaterial;
+                            cubeRenderer.sharedMaterial = boardCell.Highlighted ? DefaultFieldMaterialHighlighted : DefaultFieldMaterial;
                             break;
                         case CellState.Suspect:
-                            cubeRenderer.sharedMaterial = SuspectedFieldMaterial;
+                            cubeRenderer.sharedMaterial = boardCell.Highlighted ? SuspectedFieldMaterialHighlighted : SuspectedFieldMaterial;
                             break;
                         case CellState.Unknown:
-                            cubeRenderer.sharedMaterial = UnknownFieldMaterial;
+                            cubeRenderer.sharedMaterial = boardCell.Highlighted? UnknownFieldMaterialHighlighted : UnknownFieldMaterial;
                             break;
                     }
+
                 }
             }
 
@@ -106,8 +111,12 @@ namespace Assets.Scripts.Frontend
                 foreach (var textObject in textObjects)
                 {
                     textObject.text = text;
+                    textObject.color = boardCell.Highlighted ? Color.yellow : Color.white;
                 }
+
+                
             }
         }
+
     }
 }

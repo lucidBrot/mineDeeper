@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Assets.Scripts.Data;
+using Assets.Scripts.GameLogic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -28,12 +29,13 @@ namespace Assets.Scripts.Generator
             }
 
             var board = new Board((int)boardWidth, (int)boardHeight, (int)boardDepth);
+            (int, int, int) seedCoordTuple;
 
             for (uint bombCount = 0; bombCount < numBombs; bombCount++)
             {
                 PlaceBombRandomlyOnBoard(board);
             }
-            SeedFirstNude(board);
+            seedCoordTuple = SeedFirstNude(board);
 
             // return early for tests that are afraid of endless retries (i.e. tests that don't care about the solver)
             if (disableSolving)
@@ -61,15 +63,18 @@ namespace Assets.Scripts.Generator
                 {
                     PlaceBombRandomlyOnBoard(board);
                 }
-                SeedFirstNude(board);
+                seedCoordTuple = SeedFirstNude(board);
             }
 
             board.ResetCellStates();
-            SeedFirstNude(board);
+            // board.Reveal(board[seedCoordTuple.Item1, seedCoordTuple.Item2, seedCoordTuple.Item3]);
+            var (a, b, c) = seedCoordTuple;
+            board[a, b, c].State = CellState.Revealed;
+            // TODO: Animate Reveal
             return board;
         }
 
-        private void SeedFirstNude(Board board)
+        private (int, int, int) SeedFirstNude(Board board)
         {
             // if possible, choose a cell at the surface
             BoardCell nude = board.FirstOrDefault(cell => cell.IsNude && (
@@ -80,36 +85,32 @@ namespace Assets.Scripts.Generator
             if (nude != null)
             {
                 nude.State = CellState.Revealed;
-                return;
+                return (nude.PosX, nude.PosY, nude.PosZ);
             }
 
             Debug.Log("Did not find surface nudes.");
-            bool foundNude = false;
             foreach (BoardCell cell in board.Cells)
             {
                 if (cell.IsNude)
                 {
                     cell.State = CellState.Revealed;
-                    foundNude = true;
-                    break;
+                    return (cell.PosX, cell.PosY, cell.PosZ);
                 }
             }
 
-            if (!foundNude)
+            // no nudes available. use any non-bomb
+            foreach (BoardCell cell in board.Cells)
             {
-                // no nudes available. use any non-bomb
-                foreach (BoardCell cell in board.Cells)
+                if (!cell.IsBomb)
                 {
-                    if (!cell.IsBomb)
-                    {
-                        cell.State = CellState.Revealed;
-                        return;
-                    }
+                    cell.State = CellState.Revealed;
+                    return (cell.PosX, cell.PosY, cell.PosZ);
                 }
-
-                // only bombs available!
-                throw new EricException();
             }
+
+            // only bombs available!
+            throw new EricException();
+        
         }
 
         private void PlaceBombRandomlyOnBoard(Board board)

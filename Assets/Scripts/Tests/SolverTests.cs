@@ -119,5 +119,16 @@ namespace Assets.Scripts.Tests
             Solver.Solver solver = new Solver.Solver(board);
             Assert.True(solver.IsSolvable());
         }
+
+        [Test]
+        public void JolandaTest()
+        {
+            Board board = new Board(2, 2, 2);
+            board[0, 0, 0].State = CellState.Revealed;
+            board.SetBombState(0, 0, 1, true);
+
+            Solver.Solver solver = new Solver.Solver(board);
+            Assert.False(solver.IsSolvable(), "This is not solvable without guesswork");
+        }
     }
 }
