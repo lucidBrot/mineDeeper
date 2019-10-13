@@ -31,6 +31,11 @@ namespace Assets.Scripts.GameLogic
 
         private void OnGameboardChanged(object sender, PropertyChangedEventArgs e) 
         {
+            if (e.PropertyName != nameof(Game.GameBoard))
+            {
+                return;
+            }
+
             DestroyGameField();
             BuildGameField();
         }

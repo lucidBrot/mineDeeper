@@ -9,8 +9,8 @@ namespace Assets.Scripts.Data
     public class Game : SingletonBehaviour<Game>, INotifyPropertyChanged
     {
         private Board gameBoard;
-        private PlayerStats playerStats;
         private Hint PreviousHint;
+        private PlayerStats playerStats;
 
         public Board GameBoard
         {
@@ -19,6 +19,17 @@ namespace Assets.Scripts.Data
             {
                 if (Equals(value, gameBoard)) return;
                 gameBoard = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public PlayerStats PlayerStats
+        {
+            get => playerStats;
+            set
+            {
+                if (Equals(value, playerStats)) return;
+                playerStats = value;
                 OnPropertyChanged();
             }
         }
@@ -44,7 +55,7 @@ namespace Assets.Scripts.Data
             var generator = new Generator.Generator();
             GameBoard = generator.Generate((uint) NextBoardWidth, (uint) NextBoardHeight, (uint) NextBoardDepth,
                 (uint) NextBombCount);
-            playerStats = new PlayerStats();
+            PlayerStats = new PlayerStats();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -60,7 +71,7 @@ namespace Assets.Scripts.Data
             GameBoard.Reveal(cell);
             if (cell.IsBomb)
             {
-                playerStats.NumBombsExploded++;
+                PlayerStats.NumBombsExploded++;
             }
         }
 
@@ -72,7 +83,7 @@ namespace Assets.Scripts.Data
                 throw new NotImplementedException("Cannot Display Text Hint on GUI yet");
 
             } else { 
-                playerStats.NumHintsRequested++;
+                PlayerStats.NumHintsRequested++;
             }
 
             foreach (BoardCell cell in hint.CellsToHighlight)
