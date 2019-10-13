@@ -81,7 +81,7 @@ namespace Assets.Scripts.Data
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public String ToString()
+        public override String ToString()
         {
             StringBuilder b = new StringBuilder("Cell(");
             return b.Append(PosX).Append(", ").Append(PosY).Append(", ").Append(PosZ).Append(")").ToString();
