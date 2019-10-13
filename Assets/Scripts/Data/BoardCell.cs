@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -78,6 +79,12 @@ namespace Assets.Scripts.Data
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public String ToString()
+        {
+            StringBuilder b = new StringBuilder("Cell(");
+            return b.Append(PosX).Append(", ").Append(PosY).Append(", ").Append(PosZ).Append(")").ToString();
         }
     }
 

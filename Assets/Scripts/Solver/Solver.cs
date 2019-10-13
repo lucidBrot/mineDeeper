@@ -40,9 +40,9 @@ namespace Assets.Scripts.Solver
                 {
                     Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
                     Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
-                    computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell);
-                    computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell);
-                    computationAdvancedThisTurn |= ConsiderTheLackOfRemainingAdjacentBombs(cell);
+                    computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
+                    computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell, modifyBoard: true);
+                    computationAdvancedThisTurn |= ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
                     // TODO: consider more rules (without breaking if modified)
                 }
 
@@ -56,12 +56,50 @@ namespace Assets.Scripts.Solver
             return true;
         }
 
+        public static String Hint(Board board)
+        {
+            Solver solver = new Solver(board);
+            // TODO: ensure we are not modifying the original board state
+            var computationAdvancedThisTurn = false;
+            foreach (BoardCell cell in solver.board.Cells)
+            {
+                Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
+                Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
+
+                computationAdvancedThisTurn |= solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard:false);
+                if (computationAdvancedThisTurn)
+                {
+                    return "Consider that all hidden neighbors of "+cell.ToString()+" are bombs.";
+                }
+
+                computationAdvancedThisTurn |= solver.ConsiderAllNeighborsAreSafe(cell, modifyBoard: false);
+                if (computationAdvancedThisTurn)
+                {
+                    return "Consider that all neighbors of " + cell.ToString() + " are certainly safe.";
+                }
+
+                computationAdvancedThisTurn |= solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false);
+                if (computationAdvancedThisTurn)
+                {
+                    return "Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.";
+                }
+                // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
+            }
+
+            if (solver.numUnfoundBombs == 0)
+            {
+                return "Won.";
+            }
+
+            return "Look, I'm bamboozled. We're stuck";
+        }
+
         /// <summary>
         /// If there are already N suspects among the neighbors of the cell, then the remaining neighbors are all clean and can be revealed.
         /// </summary>
         /// <param name="cell"></param>
         /// <returns></returns>
-        private bool ConsiderTheLackOfRemainingAdjacentBombs(BoardCell cell)
+        private bool ConsiderTheLackOfRemainingAdjacentBombs(BoardCell cell, bool modifyBoard)
         {
             // only perform this check for cells that are not bombs. Because bombs carry no information about their neighbours
             // only perform this check for cells that we know the adjacent bomb count of
@@ -75,7 +113,7 @@ namespace Assets.Scripts.Solver
             {
                 board.ForEachNeighbor(cell, neighbor =>
                 {
-                    if (neighbor.State != CellState.Suspect)
+                    if (neighbor.State != CellState.Suspect && modifyBoard)
                     {
                         board.Reveal(neighbor);
                     }
@@ -91,7 +129,7 @@ namespace Assets.Scripts.Solver
         /// </summary>
         /// <param name="cell"></param>
         /// <returns>Whether the noteBoard has been modified during this call</returns>
-        private bool ConsiderAllNeighborsAreSafe(BoardCell cell)
+        private bool ConsiderAllNeighborsAreSafe(BoardCell cell, bool modifyBoard)
         {
             if (cell.State != CellState.Revealed)
             {
@@ -102,7 +140,7 @@ namespace Assets.Scripts.Solver
             {
                 var hadUnrevealed = false;
                 board.ForEachNeighbor(cell, c => hadUnrevealed |= c.State != CellState.Revealed);
-                if (hadUnrevealed)
+                if (hadUnrevealed && modifyBoard)
                 {
                     board.Reveal(cell);
                 }
@@ -116,9 +154,8 @@ namespace Assets.Scripts.Solver
         /// <summary>
         /// if the number of adjacent uncertainties equals the number on the cell, every uncertainty is a bomb
         /// </summary>
-        /// <param name="cell"></param>
         /// <returns>Whether the noteBoard has been modified</returns>
-        private bool ConsiderAllHiddenNeighborsAreBombs(BoardCell cell)
+        private bool ConsiderAllHiddenNeighborsAreBombs(BoardCell cell, bool modifyBoard)
         {
             // skip cells we know nothing of and nude cells
             if (cell.State != CellState.Revealed || cell.IsNude)
@@ -136,7 +173,11 @@ namespace Assets.Scripts.Solver
                 {
                     if (c.State != CellState.Revealed && c.State != CellState.Suspect)
                     {
-                        c.State = CellState.Suspect;
+                        if (modifyBoard)
+                        {
+                            c.State = CellState.Suspect;
+                        }
+
                         hasChanges = true;
                         numUnfoundBombs--;
                     }
