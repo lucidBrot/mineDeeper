@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Assets.Scripts.GameLogic;
 using JetBrains.Annotations;
 
 namespace Assets.Scripts.Data
@@ -7,6 +9,8 @@ namespace Assets.Scripts.Data
     public class Game : SingletonBehaviour<Game>, INotifyPropertyChanged
     {
         private Board gameBoard;
+        private PlayerStats playerStats;
+        private Hint PreviousHint;
 
         public Board GameBoard
         {
@@ -40,6 +44,7 @@ namespace Assets.Scripts.Data
             var generator = new Generator.Generator();
             GameBoard = generator.Generate((uint) NextBoardWidth, (uint) NextBoardHeight, (uint) NextBoardDepth,
                 (uint) NextBombCount);
+            playerStats = new PlayerStats();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -48,6 +53,34 @@ namespace Assets.Scripts.Data
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void Reveal(BoardCell cell)
+        {
+            GameBoard.Reveal(cell);
+            if (cell.IsBomb)
+            {
+                playerStats.NumBombsExploded++;
+            }
+        }
+
+        public void RequestHint()
+        {
+            Hint hint = Solver.Solver.Hint(GameBoard);
+            if (hint.IsSameHintAs(PreviousHint))
+            {   // same hint requested again. Show text
+                throw new NotImplementedException("Cannot Display Text Hint on GUI yet");
+
+            } else { 
+                playerStats.NumHintsRequested++;
+            }
+
+            foreach (BoardCell cell in hint.CellsToHighlight)
+            {
+                GameBoard.Highlight(cell);
+            }
+
+            PreviousHint = hint;
         }
     }
 }

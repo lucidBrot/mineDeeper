@@ -32,7 +32,7 @@ public class MouseController : MonoBehaviour
     void Update()
     {
         // print a hint to help debug
-        Debug.Log("Hint: "+Solver.Hint(Game.Instance.GameBoard));
+        Debug.Log("Hint: "+Solver.Hint(Game.Instance.GameBoard).Text);
 
         if (keyState == KeyDownState.None)
         {
@@ -61,7 +61,7 @@ public class MouseController : MonoBehaviour
                         {
                             if (keyState == KeyDownState.ActivationKey && field.BoardCell.State == CellState.Default)
                             {
-                                Game.Instance.GameBoard.Reveal(field.BoardCell);
+                                Game.Instance.Reveal(field.BoardCell);
                             }
                             else if (keyState == KeyDownState.MarkKey)
                             {

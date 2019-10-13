@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,10 +57,21 @@ namespace Assets.Scripts.Solver
             return true;
         }
 
-        public static String Hint(Board board)
+        public static Hint Hint(Board board)
         {
             Solver solver = new Solver(board);
-            // TODO: ensure we are not modifying the original board state
+
+            // TODO: hint about provably incorrect suspicions of the user
+            foreach (BoardCell wronglyFlaggedCell in board.Where(c => !c.IsBomb && c.State == CellState.Suspect))
+            {
+                Hint hint = UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(board, wronglyFlaggedCell);
+                if (hint != null)
+                {
+                    return hint;
+                }
+            }
+
+            // heuristics from solver as hints
             var computationAdvancedThisTurn = false;
             foreach (BoardCell cell in solver.board.Cells)
             {
@@ -69,32 +81,53 @@ namespace Assets.Scripts.Solver
                 computationAdvancedThisTurn |= solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard:false);
                 if (computationAdvancedThisTurn)
                 {
-                    cell.Highlighted = true;
-                    return "Consider that all hidden neighbors of "+cell.ToString()+" are bombs.";
+                    return new Hint("Consider that all hidden neighbors of "+cell.ToString()+" are bombs.", cell);
                 }
 
                 computationAdvancedThisTurn |= solver.ConsiderAllNeighborsAreSafe(cell, modifyBoard: false);
                 if (computationAdvancedThisTurn)
                 {
-                    cell.Highlighted = true;
-                    return "Consider that all neighbors of " + cell.ToString() + " are certainly safe.";
+                    return new Hint("Consider that all neighbors of " + cell.ToString() + " are certainly safe.", cell);
                 }
 
                 computationAdvancedThisTurn |= solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false);
                 if (computationAdvancedThisTurn)
                 {
-                    cell.Highlighted = true;
-                    return "Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.";
+                    board.Highlight(cell);
+                    return new Hint("Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.", cell);
                 }
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
             }
 
             if (solver.numUnfoundBombs == 0)
             {
-                return "Won.";
+                return new Hint("Won.", new List<BoardCell>());
             }
 
-            return "Look, I'm bamboozled. We're stuck";
+            return new Hint("Look, I'm bamboozled. We're stuck", new List<BoardCell>());
+        }
+
+        /// <summary>
+        /// Hints about absolutely obviously wrong suspects
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="wronglyFlaggedCell"></param>
+        /// <returns>null if no hint found, otherwise a hint</returns>
+        private static Hint UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(Board board, BoardCell wronglyFlaggedCell)
+        {
+            foreach (BoardCell revealedNeighbor in board.GetAdjacentCells(wronglyFlaggedCell.PosX, wronglyFlaggedCell.PosY,
+                wronglyFlaggedCell.PosZ).Where(c => c.State==CellState.Revealed))
+            {
+                int numFlagsAroundRevealedNeighbor =
+                    board.CountNeighbors(revealedNeighbor, c => c.State == CellState.Suspect);
+                if (revealedNeighbor.AdjacentBombCount < numFlagsAroundRevealedNeighbor)
+                {
+                    // there must be a wrong flag there
+                    return new Hint("Too many flags around " + revealedNeighbor.ToString(), revealedNeighbor);
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
