@@ -1,12 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace Assets.Scripts.Data
 {
-    public class Board : IEnumerable<BoardCell>
+    public class Board : IEnumerable<BoardCell>, INotifyPropertyChanged
     {
         private BoardCell HighlightedCell;
+        private int flagCount;
         public int Width { get; }
 
         public int Height { get; }
@@ -16,6 +20,17 @@ namespace Assets.Scripts.Data
         public BoardCell[] Cells { get; }
 
         public int BombCount { get; set; }
+
+        public int FlagCount
+        {
+            get => flagCount;
+            set
+            {
+                if (value == flagCount) return;
+                flagCount = value;
+                OnPropertyChanged();
+            }
+        }
 
         [DebuggerDisplay("{this[0]}")]
         public BoardCell this[int x, int y, int z]
@@ -141,6 +156,14 @@ namespace Assets.Scripts.Data
 
             this.HighlightedCell = cell;
             cell.Highlighted = true;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

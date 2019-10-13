@@ -124,7 +124,18 @@ namespace Assets.Scripts.Data
 
         public void ToggleMarking(BoardCell cell)
         {
+            var oldState = cell.State;
             cell.ToggleMarking();
+
+            if (oldState != CellState.Suspect && cell.State == CellState.Suspect)
+            {
+                GameBoard.FlagCount++;
+            }
+            else if (oldState == CellState.Suspect && cell.State != CellState.Suspect)
+            {
+                GameBoard.FlagCount--;
+            }
+
             CheckIfGameFinished();
             TestWhetherHintStillValid();
         }
