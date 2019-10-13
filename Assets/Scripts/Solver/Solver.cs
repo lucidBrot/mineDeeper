@@ -62,6 +62,14 @@ namespace Assets.Scripts.Solver
             Solver solver = new Solver(board);
 
             // TODO: hint about provably incorrect suspicions of the user
+            foreach (BoardCell wronglyFlaggedCell in board.Where(c => !c.IsBomb && c.State == CellState.Suspect))
+            {
+                Hint hint = UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(board, wronglyFlaggedCell);
+                if (hint != null)
+                {
+                    return hint;
+                }
+            }
 
             // heuristics from solver as hints
             var computationAdvancedThisTurn = false;
@@ -97,6 +105,29 @@ namespace Assets.Scripts.Solver
             }
 
             return new Hint("Look, I'm bamboozled. We're stuck", new List<BoardCell>());
+        }
+
+        /// <summary>
+        /// Hints about absolutely obviously wrong suspects
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="wronglyFlaggedCell"></param>
+        /// <returns>null if no hint found, otherwise a hint</returns>
+        private static Hint UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(Board board, BoardCell wronglyFlaggedCell)
+        {
+            foreach (BoardCell revealedNeighbor in board.GetAdjacentCells(wronglyFlaggedCell.PosX, wronglyFlaggedCell.PosY,
+                wronglyFlaggedCell.PosZ).Where(c => c.State==CellState.Revealed))
+            {
+                int numFlagsAroundRevealedNeighbor =
+                    board.CountNeighbors(revealedNeighbor, c => c.State == CellState.Suspect);
+                if (revealedNeighbor.AdjacentBombCount < numFlagsAroundRevealedNeighbor)
+                {
+                    // there must be a wrong flag there
+                    return new Hint("Too many flags around " + revealedNeighbor.ToString(), revealedNeighbor);
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
