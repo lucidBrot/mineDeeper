@@ -52,10 +52,15 @@ namespace Assets.Scripts.Data
             Board board = new Board(5, 3, 1);
             board.SetBombState(2, 1, 0, true);
             board.SetBombState(4, 1, 0, true);
+
+            GameBoard = board;
+            foreach (var boardCell in board)
+            {
+                boardCell.State = CellState.Default;
+            }
             board[1, 0, 0].State = CellState.Revealed;
             board[1, 1, 0].State = CellState.Suspect; // wrong flag
             board[2, 1, 0].State = CellState.Suspect; // good flag
-            GameBoard = board;
             playerStats = new PlayerStats();
         }
 
