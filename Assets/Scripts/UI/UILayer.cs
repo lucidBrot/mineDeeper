@@ -16,6 +16,11 @@ public class UILayer : SingletonBehaviour<UILayer>
     public TextMeshProUGUI HintsRequestCounter;
 
     public TextMeshProUGUI HintDrawer;
+
+    public KeyCode HintKey;
+
+    public KeyCode RestartKey;
+
     private string hintText;
 
     private PlayerStats playerStats;
@@ -37,6 +42,19 @@ public class UILayer : SingletonBehaviour<UILayer>
     void Start()
     {
         Game.Instance.PropertyChanged += GamePropertyChanged;
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyUp(HintKey))
+        {
+            ShowHint();
+        }
+
+        if (Input.GetKeyUp(RestartKey))
+        {
+            RestartGame();
+        }
     }
 
     private void GamePropertyChanged(object sender, PropertyChangedEventArgs e)
