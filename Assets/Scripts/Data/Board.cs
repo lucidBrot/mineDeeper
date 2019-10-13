@@ -6,6 +6,7 @@ namespace Assets.Scripts.Data
 {
     public class Board : IEnumerable<BoardCell>
     {
+        private BoardCell HighlightedCell;
         public int Width { get; }
 
         public int Height { get; }
@@ -124,6 +125,22 @@ namespace Assets.Scripts.Data
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public void Highlight(BoardCell cell)
+        {
+            if (this.HighlightedCell == cell)
+            {
+                return;
+            }
+
+            if (this.HighlightedCell != null)
+            {
+                this.HighlightedCell.Highlighted = false;
+            }
+
+            this.HighlightedCell = cell;
+            cell.Highlighted = true;
         }
     }
 }
