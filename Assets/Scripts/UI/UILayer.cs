@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Assets.Scripts;
 using Assets.Scripts.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Experimental.PlayerLoop;
 
-public class UILayer : MonoBehaviour
+public class UILayer : SingletonBehaviour<UILayer>
 {
     public TextMeshProUGUI BombLeftCounter;
 

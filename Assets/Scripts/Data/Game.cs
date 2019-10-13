@@ -99,7 +99,7 @@ namespace Assets.Scripts.Data
             Hint hint = Solver.Solver.Hint(GameBoard);
             if (hint.IsSameHintAs(PreviousHint))
             {   // same hint requested again. Show text
-                throw new NotImplementedException("Cannot Display Text Hint on GUI yet");
+                UILayer.Instance.HintText = hint.Text;
 
             } else { 
                 PlayerStats.NumHintsRequested++;
