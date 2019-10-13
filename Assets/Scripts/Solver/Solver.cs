@@ -67,7 +67,7 @@ namespace Assets.Scripts.Solver
                 Hint hint = UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(board, wronglyFlaggedCell);
                 if (hint != null)
                 {
-                    return hint;
+                    return hint; 
                 }
             }
 
