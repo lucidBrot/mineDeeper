@@ -65,7 +65,7 @@ public class MouseController : MonoBehaviour
                             }
                             else if (keyState == KeyDownState.MarkKey)
                             {
-                                field.BoardCell.ToggleMarking();
+                                Game.Instance.ToggleMarking(field.BoardCell);
                             }
                         }
                     }
