@@ -805,6 +805,7 @@ MonoBehaviour:
   HintDrawer: {fileID: 961693295}
   HintKey: 104
   RestartKey: 114
+  PanelBehindHintText: {fileID: 238705406}
 --- !u!1 &654837796
 GameObject:
   m_ObjectHideFlags: 0

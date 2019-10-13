@@ -25,6 +25,8 @@ public class UILayer : SingletonBehaviour<UILayer>
 
     private PlayerStats playerStats;
 
+    public GameObject PanelBehindHintText;
+
     public string HintText
     {
         get => hintText;
@@ -36,6 +38,8 @@ public class UILayer : SingletonBehaviour<UILayer>
             {
                 HintDrawer.text = hintText;
             }
+
+            PanelBehindHintText.SetActive(value != null);
         }
     }
 
