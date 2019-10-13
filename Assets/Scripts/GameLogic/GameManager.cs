@@ -66,7 +66,7 @@ namespace Assets.Scripts.GameLogic
 
             var w = board.Width;
             var h = board.Height;
-            var d = board.Height;
+            var d = board.Depth;
 
             var fieldMarginSize = FieldSize + Margin;
             var worldSize = new Vector3(w * fieldMarginSize.x, h * fieldMarginSize.y, d * fieldMarginSize.z);
