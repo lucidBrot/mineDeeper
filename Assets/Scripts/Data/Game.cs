@@ -99,7 +99,7 @@ namespace Assets.Scripts.Data
             if (!nextHint.IsSameHintAs(PreviousHint))
             {
                 UILayer.Instance.HintText = "";
-                PreviousHint.CellsToHighlight.ForEach(c => c.Highlighted = false);
+                PreviousHint?.CellsToHighlight.ForEach(c => c.Highlighted = false);
             }
         }
 
