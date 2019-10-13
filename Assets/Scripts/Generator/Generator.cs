@@ -67,7 +67,9 @@ namespace Assets.Scripts.Generator
             }
 
             board.ResetCellStates();
-            board.Reveal(board[seedCoordTuple.Item1, seedCoordTuple.Item2, seedCoordTuple.Item3]);
+            // board.Reveal(board[seedCoordTuple.Item1, seedCoordTuple.Item2, seedCoordTuple.Item3]);
+            var (a, b, c) = seedCoordTuple;
+            board[a, b, c].State = CellState.Revealed;
             // TODO: Animate Reveal
             return board;
         }
