@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Assets.Scripts.GameLogic;
 using JetBrains.Annotations;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Assets.Scripts.Data
 {
@@ -94,7 +96,7 @@ namespace Assets.Scripts.Data
             Hint hint = Solver.Solver.Hint(GameBoard);
             if (hint.IsSameHintAs(PreviousHint))
             {   // same hint requested again. Show text
-                throw new NotImplementedException("Cannot Display Text Hint on GUI yet");
+                UILayer.Instance.HintText = hint.Text;
 
             } else { 
                 PlayerStats.NumHintsRequested++;
@@ -106,6 +108,23 @@ namespace Assets.Scripts.Data
             }
 
             PreviousHint = hint;
+        }
+
+        public void ToggleMarking(BoardCell cell)
+        {
+            cell.ToggleMarking();
+            var flags = GameBoard.Where(c => c.State == CellState.Suspect);
+            if (flags.Count() == GameBoard.BombCount &&
+                flags.All(c => c.IsBomb))
+            {
+                // Game Won!
+                FinishGame(won: true);
+            }
+        }
+
+        private void FinishGame(bool won)
+        {
+            throw new NotImplementedException();
         }
     }
 }
