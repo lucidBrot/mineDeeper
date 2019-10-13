@@ -130,7 +130,7 @@ namespace Assets.Scripts.Data
 
         private void FinishGame()
         {
-            Debug.Log("Finished");
+            UILayer.Instance.HintText = "Game Finished!";
             foreach (var boardCell in GameBoard)
             {
                 boardCell.Highlighted = true;
