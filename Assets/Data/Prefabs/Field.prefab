@@ -780,9 +780,12 @@ MonoBehaviour:
     type: 2}
   SuspectedFieldMaterial: {fileID: 2100000, guid: 65db1df77767842499cd7d6408b08f8d,
     type: 2}
-  DefaultFieldMaterialHighlighted: {fileID: 0}
-  UnknownFieldMaterialHighlighted: {fileID: 0}
-  SuspectedFieldMaterialHighlighted: {fileID: 0}
+  DefaultFieldMaterialHighlighted: {fileID: 2100000, guid: 6b73cfb0885894d47bc3d7d469318e97,
+    type: 2}
+  UnknownFieldMaterialHighlighted: {fileID: 2100000, guid: 5c7f9e6385ccf014d8d882ee5b5f0c4c,
+    type: 2}
+  SuspectedFieldMaterialHighlighted: {fileID: 2100000, guid: d102f753a02603245bba34d978ac82cf,
+    type: 2}
 --- !u!1 &5922819848468705637
 GameObject:
   m_ObjectHideFlags: 0

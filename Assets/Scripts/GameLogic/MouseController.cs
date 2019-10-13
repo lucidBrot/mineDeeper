@@ -31,8 +31,6 @@ public class MouseController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // print a hint to help debug
-        Debug.Log("Hint: "+Solver.Hint(Game.Instance.GameBoard).Text);
 
         if (keyState == KeyDownState.None)
         {
@@ -62,6 +60,7 @@ public class MouseController : MonoBehaviour
                             if (keyState == KeyDownState.ActivationKey && field.BoardCell.State == CellState.Default)
                             {
                                 Game.Instance.Reveal(field.BoardCell);
+                                Game.Instance.CheckIfGameFinished();
                             }
                             else if (keyState == KeyDownState.MarkKey)
                             {
