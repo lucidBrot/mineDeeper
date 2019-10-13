@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,7 +57,7 @@ namespace Assets.Scripts.Solver
             return true;
         }
 
-        public static String Hint(Board board)
+        public static Hint Hint(Board board)
         {
             Solver solver = new Solver(board);
 
@@ -72,32 +73,30 @@ namespace Assets.Scripts.Solver
                 computationAdvancedThisTurn |= solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard:false);
                 if (computationAdvancedThisTurn)
                 {
-                    board.Highlight(cell);
-                    return "Consider that all hidden neighbors of "+cell.ToString()+" are bombs.";
+                    return new Hint("Consider that all hidden neighbors of "+cell.ToString()+" are bombs.", cell);
                 }
 
                 computationAdvancedThisTurn |= solver.ConsiderAllNeighborsAreSafe(cell, modifyBoard: false);
                 if (computationAdvancedThisTurn)
                 {
-                    board.Highlight(cell);
-                    return "Consider that all neighbors of " + cell.ToString() + " are certainly safe.";
+                    return new Hint("Consider that all neighbors of " + cell.ToString() + " are certainly safe.", cell);
                 }
 
                 computationAdvancedThisTurn |= solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false);
                 if (computationAdvancedThisTurn)
                 {
                     board.Highlight(cell);
-                    return "Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.";
+                    return new Hint("Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.", cell);
                 }
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
             }
 
             if (solver.numUnfoundBombs == 0)
             {
-                return "Won.";
+                return new Hint("Won.", new List<BoardCell>());
             }
 
-            return "Look, I'm bamboozled. We're stuck";
+            return new Hint("Look, I'm bamboozled. We're stuck", new List<BoardCell>());
         }
 
         /// <summary>
