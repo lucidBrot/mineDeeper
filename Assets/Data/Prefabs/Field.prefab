@@ -780,6 +780,12 @@ MonoBehaviour:
     type: 2}
   SuspectedFieldMaterial: {fileID: 2100000, guid: 65db1df77767842499cd7d6408b08f8d,
     type: 2}
+  DefaultFieldMaterialHighlighted: {fileID: 2100000, guid: bdb6ab709c3fdbc4287d4496bf9f82d9,
+    type: 2}
+  UnknownFieldMaterialHighlighted: {fileID: 2100000, guid: 03032ba562488354e891a6065d6a60ca,
+    type: 2}
+  SuspectedFieldMaterialHighlighted: {fileID: 2100000, guid: c9a6ffd7e0c3b8942991ea865d8dc894,
+    type: 2}
 --- !u!1 &5922819848468705637
 GameObject:
   m_ObjectHideFlags: 0

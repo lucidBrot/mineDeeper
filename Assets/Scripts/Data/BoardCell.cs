@@ -12,6 +12,7 @@ namespace Assets.Scripts.Data
     public class BoardCell : INotifyPropertyChanged
     {
         private CellState state;
+        private bool highlighted;
 
         /// <summary>
         /// My summary.
@@ -31,8 +32,17 @@ namespace Assets.Scripts.Data
         /// </summary>
         public bool IsNude => AdjacentBombCount == 0;
 
-        public bool Highlighted { get; set; }
-    
+        public bool Highlighted
+        {
+            get => highlighted;
+            set
+            {
+                if (value == highlighted) return;
+                highlighted = value;
+                OnPropertyChanged();
+            }
+        }
+
         public CellState State
         {
             get => state;
