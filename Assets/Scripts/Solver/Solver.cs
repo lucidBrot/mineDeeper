@@ -106,9 +106,9 @@ namespace Assets.Scripts.Solver
         {
             // only perform this check for cells that are not bombs (i.E. cell.State!=Suspect). Because bombs carry no information about their neighbours
             // only perform this check for cells that we know the adjacent bomb count of (i.e. cell.State==Revealed)
-            // only perform this check if there are unrevealed neighbors
+            // only perform this check if there are unrevealed unsuspect neighbors => skip if there are only revealed neighbors
             if (cell.State != CellState.Revealed || 
-                board.CountNeighbors(cell, c => c.State!=CellState.Revealed)==0
+                board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ).All(c => c.State == CellState.Revealed || c.State == CellState.Suspect)
                 )
             {
                 return false;
