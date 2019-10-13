@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using Assets.Scripts.GameLogic;
 using JetBrains.Annotations;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
 
 namespace Assets.Scripts.Data
 {
@@ -113,18 +114,27 @@ namespace Assets.Scripts.Data
         public void ToggleMarking(BoardCell cell)
         {
             cell.ToggleMarking();
+            CheckIfGameFinished();
+        }
+
+        public void CheckIfGameFinished()
+        {
             var flags = GameBoard.Where(c => c.State == CellState.Suspect);
-            if (flags.Count() == GameBoard.BombCount &&
-                flags.All(c => c.IsBomb))
+            if (flags.Count() == GameBoard.BombCount - GameBoard.Count(b => b.IsBomb && b.State == CellState.Revealed)
+                && GameBoard.All(c => c.State==CellState.Revealed || (c.State==CellState.Suspect && c.IsBomb)))
             {
                 // Game Won!
-                FinishGame(won: true);
+                FinishGame();
             }
         }
 
-        private void FinishGame(bool won)
+        private void FinishGame()
         {
-            throw new NotImplementedException();
+            UILayer.Instance.HintText = "Game Finished!";
+            foreach (var boardCell in GameBoard)
+            {
+                boardCell.Highlighted = true;
+            }
         }
     }
 }
