@@ -805,6 +805,7 @@ MonoBehaviour:
   HintDrawer: {fileID: 961693295}
   HintKey: 104
   RestartKey: 114
+  PanelBehindHintText: {fileID: 238705406}
 --- !u!1 &654837796
 GameObject:
   m_ObjectHideFlags: 0
@@ -1591,7 +1592,6 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
-  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1664,39 +1664,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 44.38, y: 0, z: 0}
---- !u!114 &963194229
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963194225}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 61b5c574194d6df41af412bdb1e1e744, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  showMain: 1
-  showSub: 1
-  gridSizeX: 100
-  gridSizeY: 100
-  gridSizeZ: 100
-  smallStep: 1
-  largeStep: 10
-  startX: 0
-  startY: 0
-  startZ: 0
-  lineMaterial: {fileID: 0}
-  mainColor:
-    r: 0
-    g: 1
-    b: 0
-    a: 1
-  subColor:
-    r: 0
-    g: 0.5
-    b: 0
-    a: 1
 --- !u!1 &1050972260
 GameObject:
   m_ObjectHideFlags: 0
