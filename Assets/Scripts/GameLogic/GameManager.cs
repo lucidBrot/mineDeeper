@@ -26,8 +26,8 @@ namespace Assets.Scripts.GameLogic
         void Start()
         {
             Game.Instance.PropertyChanged += OnGameboardChanged;
-            Game.Instance.StartDebugFlagsGame();
-            //Game.Instance.StartNewGame();
+            //Game.Instance.StartDebugFlagsGame();
+            Game.Instance.StartNewGame();
         }
 
         private void OnGameboardChanged(object sender, PropertyChangedEventArgs e) 
