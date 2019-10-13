@@ -63,6 +63,13 @@ namespace Assets.Scripts.Solver
         /// <returns></returns>
         private bool ConsiderTheLackOfRemainingAdjacentBombs(BoardCell cell)
         {
+            // only perform this check for cells that are not bombs. Because bombs carry no information about their neighbours
+            // only perform this check for cells that we know the adjacent bomb count of
+            if (cell.IsBomb || cell.State != CellState.Revealed)
+            {
+                return false;
+            }
+
             int numSurroundingSuspects = board.CountNeighbors(cell, n => n.State == CellState.Suspect);
             if (numSurroundingSuspects == cell.AdjacentBombCount)
             {
