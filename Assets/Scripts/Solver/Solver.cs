@@ -59,7 +59,10 @@ namespace Assets.Scripts.Solver
         public static String Hint(Board board)
         {
             Solver solver = new Solver(board);
-            // TODO: ensure we are not modifying the original board state
+
+            // TODO: hint about provably incorrect suspicions of the user
+
+            // heuristics from solver as hints
             var computationAdvancedThisTurn = false;
             foreach (BoardCell cell in solver.board.Cells)
             {
