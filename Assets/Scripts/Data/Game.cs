@@ -45,7 +45,7 @@ namespace Assets.Scripts.Data
 
         public int NextBombCount { get; set; }
 
-        public event EventHandler<PropertyChangedEventArgs> PlayerStatsChanged;
+        public event EventHandler<PropertyChangedEventArgs> FlagAdded;
 
         public Game()
         {
@@ -154,6 +154,15 @@ namespace Assets.Scripts.Data
             else if (oldState == CellState.Suspect && cell.State != CellState.Suspect)
             {
                 GameBoard.FlagCount--;
+            }
+
+            if (oldState != CellState.Unknown && cell.State == CellState.Unknown)
+            {
+                GameBoard.UnknownCount++;
+            }
+            else if (oldState == CellState.Unknown && cell.State != CellState.Unknown)
+            {
+                GameBoard.UnknownCount--;
             }
 
             CheckIfGameFinished();

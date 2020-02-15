@@ -21,16 +21,9 @@ namespace Assets.Scripts.Data
 
         public int BombCount { get; set; }
 
-        public int FlagCount
-        {
-            get => flagCount;
-            set
-            {
-                if (value == flagCount) return;
-                flagCount = value;
-                OnPropertyChanged();
-            }
-        }
+        public int FlagCount { get; set; }
+
+        public int UnknownCount { get; set; }
 
         [DebuggerDisplay("{this[0]}")]
         public BoardCell this[int x, int y, int z]
