@@ -36,9 +36,22 @@ namespace Assets.Scripts.Solver
                     // below assertion is wrong because it should also consider the amount of revealed neighboring bombs
                     //Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
                     Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
-                    computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
-                    computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell, modifyBoard: true);
-                    computationAdvancedThisTurn |= ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
+                    // using `if (!computationAdvancedThisTurn)` to short-circuit
+                    if (!computationAdvancedThisTurn)
+                    {
+                        computationAdvancedThisTurn = ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
+                    }
+
+                    if (!computationAdvancedThisTurn)
+                    {
+                        computationAdvancedThisTurn = ConsiderAllNeighborsAreSafe(cell, modifyBoard: true);
+                    }
+
+                    if (!computationAdvancedThisTurn)
+                    {
+                        computationAdvancedThisTurn = ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
+                    }
+
                     // TODO: consider more rules (without breaking if modified). Remember to also update Hint.
                 }
 
@@ -67,29 +80,25 @@ namespace Assets.Scripts.Solver
             }
 
             // heuristics from solver as hints
-            var computationAdvancedThisTurn = false;
             foreach (BoardCell cell in solver.board.Cells)
             {
                 Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
                 Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
 
-                computationAdvancedThisTurn |= solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard:false);
-                if (computationAdvancedThisTurn)
+                if (solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: false))
                 {
                     return new Hint(
                         cell, Data.Hint.HintTypes.AllHiddenNeighborsAreBombs,
                         "Consider that all hidden neighbors of "+cell.ToString()+" are bombs.", cell);
                 }
 
-                computationAdvancedThisTurn |= solver.ConsiderAllNeighborsAreSafe(cell, modifyBoard: false);
-                if (computationAdvancedThisTurn)
+                if (solver.ConsiderAllNeighborsAreSafe(cell, modifyBoard: false))
                 {
                     return new Hint(cell, Data.Hint.HintTypes.AllNeighborsAreSafe, 
                         "Consider that all neighbors of " + cell.ToString() + " are certainly safe.", cell);
                 }
 
-                computationAdvancedThisTurn |= solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false);
-                if (computationAdvancedThisTurn)
+                if (solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false))
                 {
                     return new Hint(cell, Data.Hint.HintTypes.MaxAdjacentBombsReached, 
                         "Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.", cell);
