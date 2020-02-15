@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
-using UnityEditor;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 namespace Assets.Scripts.Solver
