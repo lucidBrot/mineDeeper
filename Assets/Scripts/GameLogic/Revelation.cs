@@ -63,11 +63,16 @@ namespace Assets.Scripts.GameLogic
             {
                 return;
             }
-
-            lastStep = Time.time;
-
+            
+            lastStep += RevelationSpeed;
+            
             foreach (var cell in prevCells)
             {
+                if (!cell.IsNude || cell.IsBomb)
+                {
+                    continue;
+                }
+
                 foreach (var neighbor in board.NeighborsOf(cell))
                 {
                     if (neighbor.State == CellState.Default)
