@@ -39,7 +39,7 @@ namespace Assets.Scripts.Solver
                     computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell, modifyBoard: true);
                     computationAdvancedThisTurn |= ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
-                    // TODO: consider more rules (without breaking if modified)
+                    // TODO: consider more rules (without breaking if modified). Remember to also update Hint.
                 }
 
                 if (!computationAdvancedThisTurn)
@@ -56,7 +56,7 @@ namespace Assets.Scripts.Solver
         {
             Solver solver = new Solver(board);
 
-            // TODO: hint about provably incorrect suspicions of the user
+            // hint about provably incorrect suspicions of the user
             foreach (BoardCell wronglyFlaggedCell in board.Where(c => !c.IsBomb && c.State == CellState.Suspect))
             {
                 Hint hint = UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(board, wronglyFlaggedCell);
@@ -76,30 +76,33 @@ namespace Assets.Scripts.Solver
                 computationAdvancedThisTurn |= solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard:false);
                 if (computationAdvancedThisTurn)
                 {
-                    return new Hint("Consider that all hidden neighbors of "+cell.ToString()+" are bombs.", cell);
+                    return new Hint(
+                        cell, Data.Hint.HintTypes.AllHiddenNeighborsAreBombs,
+                        "Consider that all hidden neighbors of "+cell.ToString()+" are bombs.", cell);
                 }
 
                 computationAdvancedThisTurn |= solver.ConsiderAllNeighborsAreSafe(cell, modifyBoard: false);
                 if (computationAdvancedThisTurn)
                 {
-                    return new Hint("Consider that all neighbors of " + cell.ToString() + " are certainly safe.", cell);
+                    return new Hint(cell, Data.Hint.HintTypes.AllNeighborsAreSafe, 
+                        "Consider that all neighbors of " + cell.ToString() + " are certainly safe.", cell);
                 }
 
                 computationAdvancedThisTurn |= solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false);
                 if (computationAdvancedThisTurn)
                 {
-                    //board.Highlight(cell);
-                    return new Hint("Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.", cell);
+                    return new Hint(cell, Data.Hint.HintTypes.MaxAdjacentBombsReached, 
+                        "Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.", cell);
                 }
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
             }
 
             if (solver.numUnfoundBombs == 0)
             {
-                return new Hint("Won.", new List<BoardCell>());
+                return new Hint(null, Data.Hint.HintTypes.GameWon, "Won.", new List<BoardCell>());
             }
 
-            return new Hint("Look, I'm bamboozled. We're stuck", new List<BoardCell>());
+            return new Hint(null, Data.Hint.HintTypes.Bamboozled, "Look, I'm bamboozled. We're stuck", new List<BoardCell>());
         }
 
         /// <summary>
@@ -118,7 +121,8 @@ namespace Assets.Scripts.Solver
                 if (revealedNeighbor.AdjacentBombCount < numFlagsAroundRevealedNeighbor)
                 {
                     // there must be a wrong flag there
-                    return new Hint("Too many flags around " + revealedNeighbor.ToString(), revealedNeighbor);
+                    return new Hint(revealedNeighbor, Data.Hint.HintTypes.UserPlacedTooManyFlagsHere, 
+                        "Too many flags around " + revealedNeighbor.ToString(), revealedNeighbor);
                 }
             }
 

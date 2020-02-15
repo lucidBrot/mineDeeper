@@ -118,7 +118,7 @@ namespace Assets.Scripts.Data
             if (PreviousHint != null)
             {
                 Hint nextHint = Solver.Solver.Hint(GameBoard);
-                if (!nextHint.IsSameHintAs(PreviousHint))
+                if (!nextHint.IsEquivalentTo(PreviousHint))
                 {
                     UILayer.Instance.HintText = null;
                     PreviousHint?.CellsToHighlight.ForEach(c => c.Highlighted = false);
@@ -129,7 +129,7 @@ namespace Assets.Scripts.Data
         public void RequestHint()
         {
             Hint hint = Solver.Solver.Hint(GameBoard);
-            if (hint.IsSameHintAs(PreviousHint))
+            if (hint.IsEquivalentTo(PreviousHint))
             {   // same hint requested again. Show text
                 UILayer.Instance.HintText = hint.Text;
 
