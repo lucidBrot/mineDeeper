@@ -52,6 +52,11 @@ namespace Assets.Scripts.Solver
                         computationAdvancedThisTurn = ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
                     }
 
+                    if (computationAdvancedThisTurn)
+                    {
+                        break;
+                    }
+
                     // TODO: consider more rules (without breaking if modified). Remember to also update Hint.
                 }
 
