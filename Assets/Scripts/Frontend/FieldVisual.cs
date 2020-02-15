@@ -101,7 +101,7 @@ namespace Assets.Scripts.Frontend
 
                 }
             }
-
+            
             if (BombVisual != null)
             {
                 BombVisual.SetActive(boardCell.IsBomb && boardCell.State == CellState.Revealed);
@@ -109,12 +109,12 @@ namespace Assets.Scripts.Frontend
 
             if (OutlineVisual != null)
             {
-                OutlineVisual.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude);
+                OutlineVisual.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude && !boardCell.IsBomb);
             }
 
             if (Text != null)
             {
-                Text.gameObject.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude);
+                Text.gameObject.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude && !boardCell.IsBomb);
 
                 var text = boardCell.IsNude ? string.Empty : boardCell.AdjacentBombCount.ToString();
 
