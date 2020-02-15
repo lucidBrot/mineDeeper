@@ -95,11 +95,14 @@ namespace Assets.Scripts.Data
 
         private void TestWhetherHintStillValid()
         {
-            Hint nextHint = Solver.Solver.Hint(GameBoard);
-            if (!nextHint.IsSameHintAs(PreviousHint))
+            if (PreviousHint != null)
             {
-                UILayer.Instance.HintText = null;
-                PreviousHint?.CellsToHighlight.ForEach(c => c.Highlighted = false);
+                Hint nextHint = Solver.Solver.Hint(GameBoard);
+                if (!nextHint.IsSameHintAs(PreviousHint))
+                {
+                    UILayer.Instance.HintText = null;
+                    PreviousHint?.CellsToHighlight.ForEach(c => c.Highlighted = false);
+                }
             }
         }
 

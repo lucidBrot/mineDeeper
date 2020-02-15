@@ -25,6 +25,7 @@ namespace Assets.Scripts.Data
         {
             // if the text is the same, the reason is the same, it counts as the same hint
             // The text should contain the cell's coordinates
+            // TODO: instead store cell coordinates in a field and check it here?
             return hint == this || (hint != null && this.Text.Equals(hint.Text));
         }
     }
