@@ -39,7 +39,6 @@ namespace Assets.Scripts.Solver
                     computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell, modifyBoard: true);
                     computationAdvancedThisTurn |= ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
-                    computationAdvancedThisTurn |= ConsiderThereIsOnlyOneValidWayToPlaceBombs(cell, modifyBoard: true);
                     // TODO: consider more rules (without breaking if modified). Remember to also update Hint.
                 }
 
@@ -96,21 +95,6 @@ namespace Assets.Scripts.Solver
                         "Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.", cell);
                 }
 
-                computationAdvancedThisTurn |=
-                    solver.ConsiderThereIsOnlyOneValidWayToPlaceBombs(cell, modifyBoard: false);
-                if (computationAdvancedThisTurn)
-                {
-                    // TODO: setup list of all bombs
-                    List<BoardCell> bombs = board.NeighborsOf(cell).Where(
-                        c => c.State != CellState.Revealed && CellCouldBeABombBasedOnItsNeighbors(board, c)).ToList();
-
-                    return new Hint(cell,
-                        Data.Hint.HintTypes.AllHiddenNeighborsAreBombsBecauseSomeNeighborsForbidOtherOptions,
-                        "Only one unique combination of unrevealed cells that surround" 
-                        + cell.ToString() + " can be bombs without violating surrounding cell's constraints.",
-                        bombs);
-                    // highlights all those cells that are bombs
-                }
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
             }
 
@@ -246,62 +230,6 @@ namespace Assets.Scripts.Solver
             }
 
             return false;
-        }
-
-        private bool ConsiderThereIsOnlyOneValidWayToPlaceBombs(BoardCell cell, bool modifyBoard)
-        {
-            // only perform this check for cells that are not bombs (i.E. cell.State!=Suspect).
-            // Because bombs carry no information about their neighbours
-            // only perform this check for cells that we know the adjacent bomb count of (i.e. cell.State==Revealed)
-            // only perform this check if there are unrevealed unsuspect neighbors => skip if there are only revealed neighbors
-            if (cell.State != CellState.Revealed ||
-                board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ)
-                    .All(c => c.State == CellState.Revealed || c.State == CellState.Suspect)
-            )
-            {
-                return false;
-            }
-
-            int numNeighborsThatMightBeBombs = board.CountNeighbors(cell, n => 
-                (cell.IsBomb  && cell.State==CellState.Revealed)||
-                (cell.State==CellState.Suspect) ||
-                (cell.State!=CellState.Revealed && CellCouldBeABombBasedOnItsNeighbors(board, n))
-                );
-            if (numNeighborsThatMightBeBombs == cell.AdjacentBombCount)
-            {
-                // there is only one way to distribute the remaining bombs without violating surrounding constraints
-                // Every unrevealed cell that fulfills CellCouldBeABombBasedOnItsNeighbors() is actually a bomb.
-                // TODO: optimize this function so that there are less computations of the same thing over and over again
-                if (modifyBoard)
-                {
-                    BoardTools.ForEachNeighbor(board, cell, n =>
-                    {
-                        if (n.State != CellState.Revealed &&  CellCouldBeABombBasedOnItsNeighbors(board, n))
-                        {
-                            n.State = CellState.Suspect;
-                            numUnfoundBombs--;
-                        }
-                    });
-                }
-                return true;
-            }
-            
-
-            return false;
-        }
-
-        private static bool CellCouldBeABombBasedOnItsNeighbors(Board board, BoardCell c)
-        {
-            bool allNeighborsAreFineWithThis = true;
-            board.ForEachNeighbor(c, neighbor =>
-                allNeighborsAreFineWithThis |= !CellIsSatisfiedByTheNumberOfNeighboringBombs(board, neighbor));
-            return allNeighborsAreFineWithThis;
-        }
-
-        private static bool CellIsSatisfiedByTheNumberOfNeighboringBombs(Board board, BoardCell neighbor)
-        {
-            return neighbor.AdjacentBombCount == (board.CountNeighbors(neighbor, 
-                       c => c.IsBomb || c.State == CellState.Suspect ));
         }
     }
 }
