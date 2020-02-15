@@ -14,9 +14,9 @@ public class Billboard : MonoBehaviour
             return;
         }
 
-        this.transform.LookAt(c.transform.position, Vector3.up);
-        var e = this.transform.eulerAngles;
-        e = new Vector3(0, e.y, 0);
-        this.transform.eulerAngles = e;
+        var dir = this.transform.position - c.transform.position;
+        dir.y = 0;
+        var rot = Quaternion.LookRotation(dir, Vector3.up);
+        this.transform.rotation = rot;
     }
 }

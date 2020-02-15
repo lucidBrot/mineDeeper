@@ -39,13 +39,18 @@ public class UILayer : SingletonBehaviour<UILayer>
                 HintDrawer.text = hintText;
             }
 
-            PanelBehindHintText.SetActive(value != null);
+            PanelBehindHintText.SetActive(!string.IsNullOrWhiteSpace(hintText));
         }
     }
 
     void Start()
     {
         Game.Instance.PropertyChanged += GamePropertyChanged;
+
+        if (PanelBehindHintText != null && string.IsNullOrWhiteSpace(hintText))
+        {
+            PanelBehindHintText.SetActive(false);
+        }
     }
 
     void Update()
