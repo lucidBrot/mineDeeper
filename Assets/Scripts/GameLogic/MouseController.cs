@@ -28,9 +28,15 @@ public class MouseController : MonoBehaviour
 
     private Vector3 keyDownPosition;
 
+    private Revelation activeRevelation;
+
     // Update is called once per frame
     void Update()
     {
+        if (!Application.isPlaying)
+        {
+            return;
+        }
 
         if (keyState == KeyDownState.None)
         {
@@ -47,6 +53,17 @@ public class MouseController : MonoBehaviour
         }
         else
         {
+            if (activeRevelation != null)
+            {
+                // Can't accept clicks while we are given a revelation...
+                if (!activeRevelation.IsFinished)
+                {
+                    return;
+                }
+
+                activeRevelation = null;
+            }
+
             if (keyState == KeyDownState.ActivationKey && Input.GetKeyUp(ActivateKey) || keyState == KeyDownState.MarkKey && Input.GetKeyUp(MarkKey))
             {
                 var ray = Camera.ScreenPointToRay(Input.mousePosition);
@@ -59,8 +76,7 @@ public class MouseController : MonoBehaviour
                         {
                             if (keyState == KeyDownState.ActivationKey && field.BoardCell.State == CellState.Default)
                             {
-                                Game.Instance.Reveal(field.BoardCell);
-                                Game.Instance.CheckIfGameFinished();
+                                activeRevelation = RevealCellsAnimated(field.BoardCell);
                             }
                             else if (keyState == KeyDownState.MarkKey)
                             {
@@ -114,6 +130,13 @@ public class MouseController : MonoBehaviour
         {
             CameraMovement.enabled = active;
         }
+    }
+
+    private Revelation RevealCellsAnimated(BoardCell cell)
+    {
+        var revelation = Game.Instance.RevealSlow(cell);
+        revelation.FollowWith(Game.Instance.CheckIfGameFinished);
+        return revelation;
     }
 
     private enum KeyDownState

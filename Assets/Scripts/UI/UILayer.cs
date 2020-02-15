@@ -4,6 +4,7 @@ using System.ComponentModel;
 using Assets.Scripts;
 using Assets.Scripts.Data;
 using TMPro;
+using Unity_Tools.Components;
 using UnityEngine;
 using UnityEngine.Experimental.PlayerLoop;
 
@@ -15,6 +16,8 @@ public class UILayer : SingletonBehaviour<UILayer>
 
     public TextMeshProUGUI HintsRequestCounter;
 
+    public TextMeshProUGUI BombsLeftCounter;
+
     public TextMeshProUGUI HintDrawer;
 
     public KeyCode HintKey;
@@ -23,7 +26,9 @@ public class UILayer : SingletonBehaviour<UILayer>
 
     private string hintText;
 
-    private PlayerStats playerStats;
+    private PlayerStats prevPlayerStats;
+
+    private Board prevBoard;
 
     public GameObject PanelBehindHintText;
 
@@ -68,28 +73,55 @@ public class UILayer : SingletonBehaviour<UILayer>
 
     private void GamePropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName != nameof(Game.PlayerStats))
+        switch (e.PropertyName)
         {
-            return;
-        }
+            case nameof(Game.PlayerStats):
+            {
+                if (prevPlayerStats != null)
+                {
+                    prevPlayerStats.PropertyChanged -= PlayerStatsOnPropertyChanged;
+                }
 
-        if (playerStats != null)
-        {
-            playerStats.PropertyChanged -= PlayerStatsOnPropertyChanged;
-        }
+                prevPlayerStats = Game.Instance.PlayerStats;
 
-        playerStats = Game.Instance.PlayerStats;
+                if (prevPlayerStats != null)
+                {
+                    prevPlayerStats.PropertyChanged += PlayerStatsOnPropertyChanged;
+                    UpdatePlayerStats();
+                    UpdateBoardStats();
+                }
 
-        if (playerStats != null)
-        {
-            playerStats.PropertyChanged += PlayerStatsOnPropertyChanged;
-            UpdateStats();
+                break;
+            }
+            case nameof(Game.GameBoard):
+            {
+                if (prevBoard != null)
+                {
+                    prevBoard.PropertyChanged -= BoardOnPropertyChanged;
+                }
+
+                prevBoard = Game.Instance.GameBoard;
+
+                if (prevBoard != null)
+                {
+                    prevBoard.PropertyChanged += BoardOnPropertyChanged;
+                    UpdateBoardStats();
+                }
+
+                break;
+            }
         }
+    }
+
+    private void BoardOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        UpdateBoardStats();
     }
 
     private void PlayerStatsOnPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        UpdateStats();
+        UpdatePlayerStats();
+        UpdateBoardStats();
     }
 
     public void ShowHint()
@@ -107,16 +139,33 @@ public class UILayer : SingletonBehaviour<UILayer>
         Application.Quit();
     }
 
-    private void UpdateStats()
+    private void UpdatePlayerStats()
     {
         if (BombsExplodedCounter != null)
         {
-            BombsExplodedCounter.text = playerStats.NumBombsExploded.ToString();
+            BombsExplodedCounter.text = prevPlayerStats.NumBombsExploded.ToString();
         }
 
         if (HintsRequestCounter != null)
         {
-            HintsRequestCounter.text = playerStats.NumHintsRequested.ToString();
+            HintsRequestCounter.text = prevPlayerStats.NumHintsRequested.ToString();
         }
+    }
+
+    private void UpdateBoardStats()
+    {
+        if (BombsLeftCounter == null)
+        {
+            return;
+        }
+
+        if (prevBoard == null || prevPlayerStats == null)
+        {
+            BombsLeftCounter.text = "...";
+            return;
+        }
+
+        BombsLeftCounter.text =
+            (prevBoard.BombCount - prevBoard.FlagCount - prevPlayerStats.NumBombsExploded).ToString();
     }
 }

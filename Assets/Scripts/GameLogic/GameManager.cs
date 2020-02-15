@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Assets.Scripts.Data;
 using Assets.Scripts.Frontend;
+using Unity_Tools.Components;
 using UnityEngine;
 
 namespace Assets.Scripts.GameLogic
@@ -25,6 +26,11 @@ namespace Assets.Scripts.GameLogic
         // Start is called before the first frame update
         void Start()
         {
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+
             Game.Instance.PropertyChanged += OnGameboardChanged;
             //Game.Instance.StartDebugFlagsGame();
             Game.Instance.StartNewGame();

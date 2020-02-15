@@ -3,6 +3,7 @@
 
 #region usings
 
+using Unity_Tools.Core;
 using UnityEngine;
 
 #endregion
@@ -230,7 +231,7 @@ namespace Assets.Scripts.GameLogic
             }
 
             var newPos = transform.position + movement;
-            newPos = Math3D.Clamp(newPos, min, max);
+            newPos = newPos.ClampComponents(min, max);
             transform.position = newPos;
         }
     }
