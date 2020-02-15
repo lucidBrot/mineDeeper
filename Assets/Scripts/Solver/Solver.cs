@@ -33,7 +33,8 @@ namespace Assets.Scripts.Solver
                 var computationAdvancedThisTurn = false;
                 foreach (BoardCell cell in this.board.Cells)
                 {
-                    Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
+                    // below assertion is wrong because it should also consider the amount of revealed neighboring bombs
+                    //Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
                     Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
                     computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell, modifyBoard: true);
@@ -197,8 +198,10 @@ namespace Assets.Scripts.Solver
             }
 
             var unrevealedNeighborAmount = board.CountNeighbors(cell, c => c.State != CellState.Revealed);
+            var revealedNeighborBombsAmount =
+                board.CountNeighbors(cell, c => c.State == CellState.Revealed && c.IsBomb);
 
-            if (cell.AdjacentBombCount == unrevealedNeighborAmount)
+            if (cell.AdjacentBombCount - revealedNeighborBombsAmount == unrevealedNeighborAmount)
             {
                 var hasChanges = false;
 
