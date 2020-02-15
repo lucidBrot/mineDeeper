@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity_Tools.Components;
+using UnityEngine;
 
 namespace Assets.Scripts.Data
 {

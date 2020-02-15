@@ -11,6 +11,9 @@ namespace Assets.Scripts.Data
     {
         private BoardCell HighlightedCell;
         private int flagCount;
+        private int bombCount;
+        private int unknownCount;
+
         public int Width { get; }
 
         public int Height { get; }
@@ -19,11 +22,38 @@ namespace Assets.Scripts.Data
 
         public BoardCell[] Cells { get; }
 
-        public int BombCount { get; set; }
+        public int BombCount
+        {
+            get => bombCount;
+            set
+            {
+                if (value == bombCount) return;
+                bombCount = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public int FlagCount { get; set; }
+        public int FlagCount
+        {
+            get => flagCount;
+            set
+            {
+                if (value == flagCount) return;
+                flagCount = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public int UnknownCount { get; set; }
+        public int UnknownCount
+        {
+            get => unknownCount;
+            set
+            {
+                if (value == unknownCount) return;
+                unknownCount = value;
+                OnPropertyChanged();
+            }
+        }
 
         [DebuggerDisplay("{this[0]}")]
         public BoardCell this[int x, int y, int z]

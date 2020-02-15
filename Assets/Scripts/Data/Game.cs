@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Assets.Scripts.GameLogic;
 using JetBrains.Annotations;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity_Tools.Components;
 using UnityEngine;
 
 namespace Assets.Scripts.Data
@@ -44,8 +46,6 @@ namespace Assets.Scripts.Data
         public int NextBoardDepth { get; set; }
 
         public int NextBombCount { get; set; }
-
-        public event EventHandler<PropertyChangedEventArgs> FlagAdded;
 
         public Game()
         {
@@ -92,7 +92,25 @@ namespace Assets.Scripts.Data
             {
                 PlayerStats.NumBombsExploded++;
             }
+
             TestWhetherHintStillValid();
+        }
+
+        public Revelation RevealSlow(BoardCell cell)
+        {
+            var revelation = GameBoard.RevealSlow(cell);
+
+            revelation.FollowWith(() =>
+            {
+                if (cell.IsBomb)
+                {
+                    PlayerStats.NumBombsExploded++;
+                }
+
+                TestWhetherHintStillValid();
+            });
+
+            return revelation;
         }
 
         private void TestWhetherHintStillValid()

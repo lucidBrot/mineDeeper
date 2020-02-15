@@ -288,7 +288,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &238705407
 RectTransform:
   m_ObjectHideFlags: 0
@@ -408,7 +408,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 0
+  m_text: 50
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -477,7 +477,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 318767038}
-    characterCount: 1
+    characterCount: 2
     spriteCount: 0
     spaceCount: 0
     wordCount: 1
@@ -772,6 +772,7 @@ MonoBehaviour:
   BombLeftCounter: {fileID: 318767038}
   BombsExplodedCounter: {fileID: 724965900}
   HintsRequestCounter: {fileID: 1050972261}
+  BombsLeftCounter: {fileID: 318767038}
   HintDrawer: {fileID: 961693295}
   HintKey: 104
   RestartKey: 114
@@ -787,7 +788,7 @@ GameObject:
   - component: {fileID: 654837797}
   - component: {fileID: 654837798}
   m_Layer: 0
-  m_Name: GameObject (1)
+  m_Name: Values
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2958,7 +2959,7 @@ GameObject:
   - component: {fileID: 1570524253}
   - component: {fileID: 1570524254}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Headers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
