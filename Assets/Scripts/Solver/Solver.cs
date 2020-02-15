@@ -82,7 +82,6 @@ namespace Assets.Scripts.Solver
             // heuristics from solver as hints
             foreach (BoardCell cell in solver.board.Cells)
             {
-                Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
                 Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
 
                 if (solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: false))
