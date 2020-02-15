@@ -45,6 +45,8 @@ namespace Assets.Scripts.Data
 
         public int NextBombCount { get; set; }
 
+        public event EventHandler<PropertyChangedEventArgs> PlayerStatsChanged;
+
         public Game()
         {
             NextBoardWidth = 10;

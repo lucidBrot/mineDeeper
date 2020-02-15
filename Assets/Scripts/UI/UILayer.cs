@@ -46,6 +46,7 @@ public class UILayer : SingletonBehaviour<UILayer>
     void Start()
     {
         Game.Instance.PropertyChanged += GamePropertyChanged;
+        Game.Instance.PlayerStatsChanged += GamePropertyChanged;
 
         if (PanelBehindHintText != null && string.IsNullOrWhiteSpace(hintText))
         {

@@ -31,6 +31,12 @@ namespace Assets.Scripts.Data
             }
         }
 
+        public int TotalBombs { get; set; }
+
+        public int NumFlags { get; set; }
+
+        public int NumQuestions { get; set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
