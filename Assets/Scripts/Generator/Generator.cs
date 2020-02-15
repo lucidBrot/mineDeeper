@@ -110,7 +110,6 @@ namespace Assets.Scripts.Generator
 
             // only bombs available!
             throw new EricException();
-        
         }
 
         private void PlaceBombRandomlyOnBoard(Board board)

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Assets.Scripts.Data;
+using Assets.Scripts.GameLogic;
 using TMPro;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace Assets.Scripts.Frontend
 {
     public class FieldVisual : MonoBehaviour
     {
-        public GameObject TextContainer;
+        public TextMeshPro Text;
 
         public GameObject CubeVisual;
 
@@ -49,6 +50,16 @@ namespace Assets.Scripts.Frontend
                     boardCell.PropertyChanged += OnBoardCellPropertyChanged;
                     UpdateVisual();
                 }
+            }
+        }
+
+        private float defaultFontSize;
+
+        private void OnEnable()
+        {
+            if (Text != null)
+            {
+                defaultFontSize = Text.fontSize;
             }
         }
 
@@ -101,20 +112,30 @@ namespace Assets.Scripts.Frontend
                 OutlineVisual.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude);
             }
 
-            if (TextContainer != null)
+            if (Text != null)
             {
-                TextContainer.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude);
+                Text.gameObject.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude);
 
                 var text = boardCell.IsNude ? string.Empty : boardCell.AdjacentBombCount.ToString();
-                var textObjects = TextContainer.GetComponentsInChildren<TextMeshPro>();
 
-                foreach (var textObject in textObjects)
+                Text.text = text;
+
+                if (!boardCell.IsNude)
                 {
-                    textObject.text = text;
-                    textObject.color = boardCell.Highlighted ? Color.yellow : Color.white;
+                    var colors = ColorProvider.Instance.NumberColors;
+                    var index = boardCell.AdjacentBombCount - 1;
+                    this.Text.color = index < colors.Length ? colors[index] : colors[colors.Length - 1];
                 }
 
-                
+                if (boardCell.Highlighted)
+                {
+                    Text.color = Color.yellow;
+                    Text.fontSize = 1.5f * defaultFontSize;
+                }
+                else
+                {
+                    Text.fontSize = defaultFontSize;
+                }
             }
         }
 
