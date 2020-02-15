@@ -115,26 +115,25 @@ namespace Assets.Scripts.Data
 
             } else { 
                 PlayerStats.NumHintsRequested++;
+                RedrawHintHighlights(hint);
             }
-
-            RedrawHintHighlights(hint);
 
             PreviousHint = hint;
         }
 
         public void RedrawHintHighlights([CanBeNull] Hint hint = null)
         {
-            if (PreviousHint == null)
+            if (hint == null)
+            {
+                hint = PreviousHint;
+            }
+
+            if (hint == null)
             {
                 // nothing to highlight
                 return;
             }
 
-            if (hint == null)
-            {
-                hint = PreviousHint;
-            }
-            
             foreach (BoardCell cell in hint.CellsToHighlight)
             {
                 GameBoard.Highlight(cell);

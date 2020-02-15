@@ -87,7 +87,7 @@ namespace Assets.Scripts.Solver
                 computationAdvancedThisTurn |= solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false);
                 if (computationAdvancedThisTurn)
                 {
-                    board.Highlight(cell);
+                    //board.Highlight(cell);
                     return new Hint("Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.", cell);
                 }
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
