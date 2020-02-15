@@ -101,11 +101,12 @@ namespace Assets.Scripts.Solver
                 if (computationAdvancedThisTurn)
                 {
                     // TODO: setup list of all bombs
-                    List<BoardCell> bombs = ;
+                    List<BoardCell> bombs = board.NeighborsOf(cell).Where(
+                        c => c.State != CellState.Revealed && CellCouldBeABombBasedOnItsNeighbors(board, c)).ToList();
 
                     return new Hint(cell,
                         Data.Hint.HintTypes.AllHiddenNeighborsAreBombsBecauseSomeNeighborsForbidOtherOptions,
-                        "A unique combination of unrevealed cells that surround" 
+                        "Only one unique combination of unrevealed cells that surround" 
                         + cell.ToString() + " can be bombs without violating surrounding cell's constraints.",
                         bombs);
                     // highlights all those cells that are bombs
@@ -264,7 +265,7 @@ namespace Assets.Scripts.Solver
             int numNeighborsThatMightBeBombs = board.CountNeighbors(cell, n => 
                 (cell.IsBomb  && cell.State==CellState.Revealed)||
                 (cell.State==CellState.Suspect) ||
-                (cell.State!=CellState.Revealed && CellCouldBeABombBasedOnItsNeighbors(n))
+                (cell.State!=CellState.Revealed && CellCouldBeABombBasedOnItsNeighbors(board, n))
                 );
             if (numNeighborsThatMightBeBombs == cell.AdjacentBombCount)
             {
@@ -275,7 +276,7 @@ namespace Assets.Scripts.Solver
                 {
                     BoardTools.ForEachNeighbor(board, cell, n =>
                     {
-                        if (n.State != CellState.Revealed &&  CellCouldBeABombBasedOnItsNeighbors(n))
+                        if (n.State != CellState.Revealed &&  CellCouldBeABombBasedOnItsNeighbors(board, n))
                         {
                             n.State = CellState.Suspect;
                             numUnfoundBombs--;
@@ -289,14 +290,15 @@ namespace Assets.Scripts.Solver
             return false;
         }
 
-        private bool CellCouldBeABombBasedOnItsNeighbors(BoardCell c)
+        private static bool CellCouldBeABombBasedOnItsNeighbors(Board board, BoardCell c)
         {
             bool allNeighborsAreFineWithThis = true;
-            board.ForEachNeighbor(c, neighbor => allNeighborsAreFineWithThis |= !CellIsSatisfiedByTheNumberOfNeighboringBombs(neighbor));
+            board.ForEachNeighbor(c, neighbor =>
+                allNeighborsAreFineWithThis |= !CellIsSatisfiedByTheNumberOfNeighboringBombs(board, neighbor));
             return allNeighborsAreFineWithThis;
         }
 
-        private bool CellIsSatisfiedByTheNumberOfNeighboringBombs(BoardCell neighbor)
+        private static bool CellIsSatisfiedByTheNumberOfNeighboringBombs(Board board, BoardCell neighbor)
         {
             return neighbor.AdjacentBombCount == (board.CountNeighbors(neighbor, 
                        c => c.IsBomb || c.State == CellState.Suspect ));
