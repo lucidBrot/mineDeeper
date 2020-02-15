@@ -39,7 +39,7 @@ namespace Assets.Scripts.Solver
                     computationAdvancedThisTurn |= ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
                     computationAdvancedThisTurn |= ConsiderAllNeighborsAreSafe(cell, modifyBoard: true);
                     computationAdvancedThisTurn |= ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
-                    // TODO: consider more rules (without breaking if modified)
+                    // TODO: consider more rules (without breaking if modified). Remember to also update Hint.
                 }
 
                 if (!computationAdvancedThisTurn)
@@ -56,7 +56,7 @@ namespace Assets.Scripts.Solver
         {
             Solver solver = new Solver(board);
 
-            // TODO: hint about provably incorrect suspicions of the user
+            // hint about provably incorrect suspicions of the user
             foreach (BoardCell wronglyFlaggedCell in board.Where(c => !c.IsBomb && c.State == CellState.Suspect))
             {
                 Hint hint = UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(board, wronglyFlaggedCell);
@@ -88,7 +88,6 @@ namespace Assets.Scripts.Solver
                 computationAdvancedThisTurn |= solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false);
                 if (computationAdvancedThisTurn)
                 {
-                    //board.Highlight(cell);
                     return new Hint("Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.", cell);
                 }
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
