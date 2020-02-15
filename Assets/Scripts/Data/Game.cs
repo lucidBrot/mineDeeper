@@ -95,11 +95,14 @@ namespace Assets.Scripts.Data
 
         private void TestWhetherHintStillValid()
         {
-            Hint nextHint = Solver.Solver.Hint(GameBoard);
-            if (!nextHint.IsSameHintAs(PreviousHint))
+            if (PreviousHint != null)
             {
-                UILayer.Instance.HintText = null;
-                PreviousHint?.CellsToHighlight.ForEach(c => c.Highlighted = false);
+                Hint nextHint = Solver.Solver.Hint(GameBoard);
+                if (!nextHint.IsSameHintAs(PreviousHint))
+                {
+                    UILayer.Instance.HintText = null;
+                    PreviousHint?.CellsToHighlight.ForEach(c => c.Highlighted = false);
+                }
             }
         }
 
@@ -112,14 +115,29 @@ namespace Assets.Scripts.Data
 
             } else { 
                 PlayerStats.NumHintsRequested++;
+                RedrawHintHighlights(hint);
+            }
+
+            PreviousHint = hint;
+        }
+
+        public void RedrawHintHighlights([CanBeNull] Hint hint = null)
+        {
+            if (hint == null)
+            {
+                hint = PreviousHint;
+            }
+
+            if (hint == null)
+            {
+                // nothing to highlight
+                return;
             }
 
             foreach (BoardCell cell in hint.CellsToHighlight)
             {
                 GameBoard.Highlight(cell);
             }
-
-            PreviousHint = hint;
         }
 
         public void ToggleMarking(BoardCell cell)
