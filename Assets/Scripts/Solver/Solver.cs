@@ -99,6 +99,11 @@ namespace Assets.Scripts.Solver
             // heuristics from solver as hints
             foreach (BoardCell cell in solver.board.Cells)
             {
+                // if it is a revealed bomb, it's a weird case we didn't think of before. It's safer to just ignore that for now
+                if (cell.IsBomb && cell.State != CellState.Revealed)
+                {
+                    continue;
+                }
                 Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
 
                 if (solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: false))
