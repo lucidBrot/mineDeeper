@@ -153,7 +153,7 @@ namespace Assets.Scripts.Solver
                     return new Hint(cell,
                         Data.Hint.HintTypes.ThereIsOnlyOneLegalOptionToArrangeTheTwoMissingBombs,
                         "There is only one way the two missing bombs around " + cell.ToString() + " can be placed.",
-                        l);
+                        cell);
                 }
 
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
