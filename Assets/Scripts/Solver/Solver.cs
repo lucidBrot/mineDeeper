@@ -58,6 +58,10 @@ namespace Assets.Scripts.Solver
 
                     if (!computationAdvancedThisTurn)
                     {
+                        if (cell.PosX == 2 && cell.PosY == 2 && cell.PosZ == 0)
+                        {
+                            var a = 1;
+                        }
                         computationAdvancedThisTurn = ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
                     }
 
@@ -301,12 +305,6 @@ namespace Assets.Scripts.Solver
 
         private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard, [CanBeNull] out Tuple<BoardCell, BoardCell> bombsFound)
         {
-            var a = 0;
-            if (cell.PosX == 2 && cell.PosY == 2 && cell.PosZ == 0)
-            {
-                a = 1;
-            }
-
             // by default, we found nothing
             bombsFound = null;
 
