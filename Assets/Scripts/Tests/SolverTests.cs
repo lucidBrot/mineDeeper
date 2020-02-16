@@ -27,7 +27,8 @@ namespace Assets.Scripts.Tests
             testBoard[2, 1, 0].State = CellState.Revealed;
             Solver.Solver solver = new Solver.Solver(testBoard);
 
-            Assert.AreEqual(true, solver.IsSolvable(), "HerbertExample should be solvable");
+            Assert.AreEqual(true, solver.IsSolvable(), "HerbertExample should be solvable but that functionality is not implemented yet. See " +
+                                                       "ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal for inspiration");
         }
 
         [Test]
