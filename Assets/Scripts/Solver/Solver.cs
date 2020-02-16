@@ -37,6 +37,11 @@ namespace Assets.Scripts.Solver
                 {
                     // below assertion is wrong because it should also consider the amount of revealed neighboring bombs
                     //Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
+                    if (cell.IsBomb && cell.State == CellState.Revealed)
+                    {
+                        continue;
+                    }
+
                     Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
                     // using `if (!computationAdvancedThisTurn)` to short-circuit.
                     // On second thought, It could be better or worse than using |= which does not short-circuit -
@@ -100,7 +105,7 @@ namespace Assets.Scripts.Solver
             foreach (BoardCell cell in solver.board.Cells)
             {
                 // if it is a revealed bomb, it's a weird case we didn't think of before. It's safer to just ignore that for now
-                if (cell.IsBomb && cell.State != CellState.Revealed)
+                if (cell.IsBomb && cell.State == CellState.Revealed)
                 {
                     continue;
                 }
@@ -296,6 +301,12 @@ namespace Assets.Scripts.Solver
 
         private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard, [CanBeNull] out Tuple<BoardCell, BoardCell> bombsFound)
         {
+            var a = 0;
+            if (cell.PosX == 2 && cell.PosY == 2 && cell.PosZ == 0)
+            {
+                a = 1;
+            }
+
             // by default, we found nothing
             bombsFound = null;
 
@@ -308,7 +319,7 @@ namespace Assets.Scripts.Solver
             // consider only cells with exactly 2 missing bombs
             if (cell.AdjacentBombCount - 
                 board.NeighborsOf(cell).Count(
-                    c => c.State == CellState.Suspect || c.IsBomb) != 2
+                    c => c.State == CellState.Suspect || (c.IsBomb && c.State == CellState.Revealed)) != 2
                 )
             {
                 return false;
@@ -319,25 +330,25 @@ namespace Assets.Scripts.Solver
 
             // get all unrevealed neighbors - those could be bombs
             var unrevealedNeighbors = board.NeighborsOf(cell).Where(c => c.State != CellState.Revealed)
-                .OrderBy(x => x.PosX).ThenBy(x => x.PosY).ThenBy(x => x.PosZ);
+                .OrderBy(x => x.PosX).ThenBy(x => x.PosY).ThenBy(x => x.PosZ).ToList();
             foreach (BoardCell possibleBomb1 in unrevealedNeighbors)
             {
                 // would that bomb even be valid?
                 if (board.NeighborsOf(possibleBomb1).Any(
                     // has already enough bombs
-                    c => board.NeighborsOf(c).Count(n => n.IsBomb || n.State == CellState.Suspect) >= c.AdjacentBombCount
+                    c => board.NeighborsOf(c).Count(n => (n.IsBomb && n.State == CellState.Revealed) || n.State == CellState.Suspect) >= c.AdjacentBombCount
                     ))
                 {
                     continue;
                 }
 
                 // try all other bombs
-                foreach (BoardCell possibleBomb2 in unrevealedNeighbors.Where(d => d != possibleBomb1))
+                var unrevealedNeighborsReversed = Enumerable.Reverse(unrevealedNeighbors);
+                foreach (BoardCell possibleBomb2 in unrevealedNeighborsReversed)
                 {
-                    // we only need to consider each couple (a, b) once
-                    var combination = new BoardCell[] {possibleBomb1, possibleBomb2};
-                    var canonicalCombination = combination.OrderBy(x => x.PosX).ThenBy(x => x.PosY).ThenBy(x => x.PosZ);
-                    if (combination.GetValue(0) != canonicalCombination.First())
+                    // we only need to consider each couple (a, b) once.
+                    // Since the inner loop is reversed, we can stop the inner loop once a == b
+                    if (possibleBomb1 == possibleBomb2)
                     {
                         break;
                     }
@@ -345,7 +356,7 @@ namespace Assets.Scripts.Solver
                     // would that bomb2 even be valid?
                     if (board.NeighborsOf(possibleBomb2).Any(
                         // has already enough bombs
-                        c => board.NeighborsOf(c).Count(n => n.IsBomb || n.State == CellState.Suspect) >=
+                        c => board.NeighborsOf(c).Count(n => (n.State == CellState.Revealed && n.IsBomb) || n.State == CellState.Suspect) >=
                              c.AdjacentBombCount
                     ))
                     {
@@ -355,17 +366,19 @@ namespace Assets.Scripts.Solver
                     // Each possibleBomb on its own would be valid. Would the combination still be?
                     // Check all cells that are neighbors of of both bombs for whether they disagree
                     bool atLeastOneJudgeDisagrees = false;
-                    foreach (BoardCell judge in board.NeighborsOf(possibleBomb1)
-                        .Union(board.NeighborsOf(possibleBomb2)))
+                    var neighborsOfBothPossibleBombs = board.NeighborsOf(possibleBomb1)
+                        .Intersect(board.NeighborsOf(possibleBomb2));
+                    foreach (BoardCell judge in neighborsOfBothPossibleBombs.Where(c => c.State == CellState.Revealed && !c.IsBomb))
                     {
-                        if (board.NeighborsOf(judge).Any(
-                            // has already enough bombs
-                            c => board.NeighborsOf(c).Count(n => n.IsBomb || n.State == CellState.Suspect) + 2 >
-                                 c.AdjacentBombCount
-                        ))
+                        if (board.NeighborsOf(judge)
+                                     .Count(n => (n.State == CellState.Revealed 
+                                            && n.IsBomb ) || n.State == CellState.Suspect) 
+                                            + 2 > judge.AdjacentBombCount
+                        )
                         {
                             // at least one judge disagrees. Do not store this option and continue checking other options
                             atLeastOneJudgeDisagrees = true;
+                            break;
                         }
                     }
 

@@ -137,7 +137,7 @@ namespace Assets.Scripts.Tests
             /*
              * Solution:     Given (with num bombs = 3)
              * 0 1 1       ? ? 1
-             * 1 0 x       ? ? ?
+             * 1 2 x       ? ? ?
              * 1 x 2       1 ? 2
              */
             Board testBoard = new Board(3, 3, 1);
