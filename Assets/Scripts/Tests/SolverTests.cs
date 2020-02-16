@@ -130,5 +130,25 @@ namespace Assets.Scripts.Tests
             Solver.Solver solver = new Solver.Solver(board);
             Assert.False(solver.IsSolvable(), "This is not solvable without guesswork");
         }
+
+        [Test, Timeout(2000)]
+        public void TaelurExampleSolvable()
+        {
+            /*
+             * Solution:     Given (with num bombs = 3)
+             * 0 1 1       ? ? 1
+             * 1 0 x       ? ? ?
+             * 1 x 2       1 ? 2
+             */
+            Board testBoard = new Board(3, 3, 1);
+            testBoard.SetBombState(1,2, 0, true);
+            testBoard.SetBombState(2, 1, 0, true);
+            testBoard[0, 2, 0].State = CellState.Revealed;
+            testBoard[2, 2, 0].State = CellState.Revealed;
+            testBoard[2, 0, 0].State = CellState.Revealed;
+            Solver.Solver solver = new Solver.Solver(testBoard);
+
+            Assert.AreEqual(true, solver.IsSolvable(), "TaelurExample should be solvable");
+        }
     }
 }
