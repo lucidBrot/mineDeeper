@@ -58,10 +58,6 @@ namespace Assets.Scripts.Solver
 
                     if (!computationAdvancedThisTurn)
                     {
-                        if (cell.PosX == 2 && cell.PosY == 2 && cell.PosZ == 0)
-                        {
-                            var a = 1;
-                        }
                         computationAdvancedThisTurn = ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
                     }
 
