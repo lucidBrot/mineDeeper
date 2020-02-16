@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts.Data;
+using Assets.Scripts.Data; 
 using NUnit.Framework;
 
 namespace Assets.Scripts.Tests

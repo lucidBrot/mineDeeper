@@ -5,9 +5,7 @@
         "UnityEditor.TestRunner",
         "MineDeeper"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
