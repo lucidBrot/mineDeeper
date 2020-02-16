@@ -51,7 +51,7 @@ namespace Assets.Scripts.Data
             GameWon,
             Bamboozled,
             UserPlacedTooManyFlagsHere,
-            AllHiddenNeighborsAreBombsBecauseSomeNeighborsForbidOtherOptions,
+            ThereIsOnlyOneLegalOptionToArrangeTheTwoMissingBombs,
         }
     }
 }

@@ -56,6 +56,14 @@ namespace Assets.Scripts.Solver
                         computationAdvancedThisTurn = ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
                     }
 
+                    if (!computationAdvancedThisTurn)
+                    {
+                        // this is a more costly operation and hence should only be tried if others don't help
+                        computationAdvancedThisTurn =
+                            ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard: true,
+                                out _);
+                    }
+
                     if (computationAdvancedThisTurn)
                     {
                         break;
@@ -111,6 +119,27 @@ namespace Assets.Scripts.Solver
                     return new Hint(cell, Data.Hint.HintTypes.MaxAdjacentBombsReached,
                         "Consider that there can not be any more bombs around " + cell.ToString() +
                         " than you already found.", cell);
+                }
+
+                // this is a more costly operation and it is harder for the user to see
+                Tuple<BoardCell, BoardCell> bombPair;
+                if (solver.ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard:false, out bombPair))
+                {
+                    List<BoardCell> l;
+                    if (bombPair == null)
+                    {
+                        Debug.Log("bombPair for hint is null, but a solution was found. This should never happen. Highlighting the concerned Cell...");
+                        l = new List<BoardCell>() {cell};
+                    }
+                    else
+                    {
+                        l = new List<BoardCell>() {bombPair.Item1, bombPair.Item2};
+                    }
+
+                    return new Hint(cell,
+                        Data.Hint.HintTypes.ThereIsOnlyOneLegalOptionToArrangeTheTwoMissingBombs,
+                        "There is only one way the two missing bombs around " + cell.ToString() + " can be placed.",
+                        l);
                 }
 
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
