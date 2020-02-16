@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Assets.Scripts.Solver
@@ -36,7 +38,9 @@ namespace Assets.Scripts.Solver
                     // below assertion is wrong because it should also consider the amount of revealed neighboring bombs
                     //Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
                     Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
-                    // using `if (!computationAdvancedThisTurn)` to short-circuit
+                    // using `if (!computationAdvancedThisTurn)` to short-circuit.
+                    // On second thought, It could be better or worse than using |= which does not short-circuit -
+                    // because if all options for one cell are checked at the same cell, caching might work better.
                     if (!computationAdvancedThisTurn)
                     {
                         computationAdvancedThisTurn = ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
@@ -80,7 +84,7 @@ namespace Assets.Scripts.Solver
                 Hint hint = UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(board, wronglyFlaggedCell);
                 if (hint != null)
                 {
-                    return hint; 
+                    return hint;
                 }
             }
 
@@ -93,19 +97,20 @@ namespace Assets.Scripts.Solver
                 {
                     return new Hint(
                         cell, Data.Hint.HintTypes.AllHiddenNeighborsAreBombs,
-                        "Consider that all hidden neighbors of "+cell.ToString()+" are bombs.", cell);
+                        "Consider that all hidden neighbors of " + cell.ToString() + " are bombs.", cell);
                 }
 
                 if (solver.ConsiderAllNeighborsAreSafe(cell, modifyBoard: false))
                 {
-                    return new Hint(cell, Data.Hint.HintTypes.AllNeighborsAreSafe, 
+                    return new Hint(cell, Data.Hint.HintTypes.AllNeighborsAreSafe,
                         "Consider that all neighbors of " + cell.ToString() + " are certainly safe.", cell);
                 }
 
                 if (solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false))
                 {
-                    return new Hint(cell, Data.Hint.HintTypes.MaxAdjacentBombsReached, 
-                        "Consider that there can not be any more bombs around " + cell.ToString() + " than you already found.", cell);
+                    return new Hint(cell, Data.Hint.HintTypes.MaxAdjacentBombsReached,
+                        "Consider that there can not be any more bombs around " + cell.ToString() +
+                        " than you already found.", cell);
                 }
 
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
@@ -116,7 +121,8 @@ namespace Assets.Scripts.Solver
                 return new Hint(null, Data.Hint.HintTypes.GameWon, "Won.", new List<BoardCell>());
             }
 
-            return new Hint(null, Data.Hint.HintTypes.Bamboozled, "Look, I'm bamboozled. We're stuck", new List<BoardCell>());
+            return new Hint(null, Data.Hint.HintTypes.Bamboozled, "Look, I'm bamboozled. We're stuck",
+                new List<BoardCell>());
         }
 
         /// <summary>
@@ -125,17 +131,19 @@ namespace Assets.Scripts.Solver
         /// <param name="board"></param>
         /// <param name="wronglyFlaggedCell"></param>
         /// <returns>null if no hint found, otherwise a hint</returns>
-        private static Hint UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(Board board, BoardCell wronglyFlaggedCell)
+        private static Hint UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(Board board,
+            BoardCell wronglyFlaggedCell)
         {
-            foreach (BoardCell revealedNeighbor in board.GetAdjacentCells(wronglyFlaggedCell.PosX, wronglyFlaggedCell.PosY,
-                wronglyFlaggedCell.PosZ).Where(c => c.State==CellState.Revealed))
+            foreach (BoardCell revealedNeighbor in board.GetAdjacentCells(wronglyFlaggedCell.PosX,
+                wronglyFlaggedCell.PosY,
+                wronglyFlaggedCell.PosZ).Where(c => c.State == CellState.Revealed))
             {
                 int numFlagsAroundRevealedNeighbor =
                     board.CountNeighbors(revealedNeighbor, c => c.State == CellState.Suspect);
                 if (revealedNeighbor.AdjacentBombCount < numFlagsAroundRevealedNeighbor)
                 {
                     // there must be a wrong flag there
-                    return new Hint(revealedNeighbor, Data.Hint.HintTypes.UserPlacedTooManyFlagsHere, 
+                    return new Hint(revealedNeighbor, Data.Hint.HintTypes.UserPlacedTooManyFlagsHere,
                         "Too many flags around " + revealedNeighbor.ToString(), revealedNeighbor);
                 }
             }
@@ -155,9 +163,10 @@ namespace Assets.Scripts.Solver
             // Because bombs carry no information about their neighbours
             // only perform this check for cells that we know the adjacent bomb count of (i.e. cell.State==Revealed)
             // only perform this check if there are unrevealed unsuspect neighbors => skip if there are only revealed neighbors
-            if (cell.State != CellState.Revealed || 
-                board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ).All(c => c.State == CellState.Revealed || c.State == CellState.Suspect)
-                )
+            if (cell.State != CellState.Revealed ||
+                board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ)
+                    .All(c => c.State == CellState.Revealed || c.State == CellState.Suspect)
+            )
             {
                 return false;
             }
@@ -243,6 +252,121 @@ namespace Assets.Scripts.Solver
             }
 
             return false;
+        }
+
+        private bool CellAcceptsAnotherNNeighboringBombs(BoardCell cell, int n)
+        {
+            return cell.AdjacentBombCount >=
+                   n + board.NeighborsOf(cell).Count(c => c.IsBomb || c.State == CellState.Suspect);
+        }
+
+        private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard, [CanBeNull] out Tuple<BoardCell, BoardCell> bombsFound)
+        {
+            // by default, we found nothing
+            bombsFound = null;
+
+            // skip cells we know nothing of and nude cells
+            if (cell.State != CellState.Revealed || cell.IsNude)
+            {
+                return false;
+            }
+
+            // consider only cells with exactly 2 missing bombs
+            if (cell.AdjacentBombCount - 
+                board.NeighborsOf(cell).Count(
+                    c => c.State == CellState.Suspect || c.IsBomb) != 2
+                )
+            {
+                return false;
+            }
+
+            // we will want to store all possibilities
+            List<Tuple<BoardCell, BoardCell>> possibleBombPairs = new List<Tuple<BoardCell, BoardCell>>(2);
+
+            // get all unrevealed neighbors - those could be bombs
+            var unrevealedNeighbors = board.NeighborsOf(cell).Where(c => c.State != CellState.Revealed)
+                .OrderBy(x => x.PosX).ThenBy(x => x.PosY).ThenBy(x => x.PosZ);
+            foreach (BoardCell possibleBomb1 in unrevealedNeighbors)
+            {
+                // would that bomb even be valid?
+                if (board.NeighborsOf(possibleBomb1).Any(
+                    // has already enough bombs
+                    c => board.NeighborsOf(c).Count(n => n.IsBomb || n.State == CellState.Suspect) >= c.AdjacentBombCount
+                    ))
+                {
+                    continue;
+                }
+
+                // try all other bombs
+                foreach (BoardCell possibleBomb2 in unrevealedNeighbors.Where(d => d != possibleBomb1))
+                {
+                    // we only need to consider each couple (a, b) once
+                    var combination = new BoardCell[] {possibleBomb1, possibleBomb2};
+                    var canonicalCombination = combination.OrderBy(x => x.PosX).ThenBy(x => x.PosY).ThenBy(x => x.PosZ);
+                    if (combination.GetValue(0) != canonicalCombination.First())
+                    {
+                        break;
+                    }
+
+                    // would that bomb2 even be valid?
+                    if (board.NeighborsOf(possibleBomb2).Any(
+                        // has already enough bombs
+                        c => board.NeighborsOf(c).Count(n => n.IsBomb || n.State == CellState.Suspect) >=
+                             c.AdjacentBombCount
+                    ))
+                    {
+                        continue;
+                    }
+
+                    // Each possibleBomb on its own would be valid. Would the combination still be?
+                    // Check all cells that are neighbors of of both bombs for whether they disagree
+                    bool atLeastOneJudgeDisagrees = false;
+                    foreach (BoardCell judge in board.NeighborsOf(possibleBomb1)
+                        .Union(board.NeighborsOf(possibleBomb2)))
+                    {
+                        if (board.NeighborsOf(judge).Any(
+                            // has already enough bombs
+                            c => board.NeighborsOf(c).Count(n => n.IsBomb || n.State == CellState.Suspect) + 2 >
+                                 c.AdjacentBombCount
+                        ))
+                        {
+                            // at least one judge disagrees. Do not store this option and continue checking other options
+                            atLeastOneJudgeDisagrees = true;
+                        }
+                    }
+
+                    if (!atLeastOneJudgeDisagrees)
+                    {
+                        // everything fine, store this as a possible option
+                        possibleBombPairs.Add(new Tuple<BoardCell, BoardCell>(possibleBomb1, possibleBomb2));
+                        if (possibleBombPairs.Count > 1)
+                        {
+                            // too many options - the solution is not unique
+                            return false;
+                        }
+                    }
+
+                }
+
+            }
+
+            if(possibleBombPairs.Count == 0)
+            {
+                // nothing found
+                return false;
+            }
+
+            Debug.Assert(possibleBombPairs.Count == 1);
+
+            if (modifyBoard)
+            {
+                possibleBombPairs[0].Item1.State = CellState.Suspect;
+                possibleBombPairs[0].Item2.State = CellState.Suspect;
+            }
+
+            bombsFound = possibleBombPairs[0];
+            return true;
+
         }
     }
 }
