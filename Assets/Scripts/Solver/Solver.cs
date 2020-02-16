@@ -407,6 +407,7 @@ namespace Assets.Scripts.Solver
             {
                 possibleBombPairs[0].Item1.State = CellState.Suspect;
                 possibleBombPairs[0].Item2.State = CellState.Suspect;
+                numUnfoundBombs -= 2;
             }
 
             bombsFound = possibleBombPairs[0];
