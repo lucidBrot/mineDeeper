@@ -266,6 +266,7 @@ MonoBehaviour:
   CubeVisual: {fileID: 8759642122592289805}
   OutlineVisual: {fileID: 0}
   BombVisual: {fileID: 8602150149341810375}
+  Color: {r: 1, g: 1, b: 1, a: 1}
   DefaultFieldMaterial: {fileID: 2100000, guid: e333ccd86c11a0148a820c646ca2b4b7,
     type: 2}
   UnknownFieldMaterial: {fileID: 2100000, guid: 54d2594cad951ee40ab56bac054eee66,

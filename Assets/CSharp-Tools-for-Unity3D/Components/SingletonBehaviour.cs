@@ -44,9 +44,9 @@ namespace Unity_Tools.Components
         /// <summary>
         /// Gets a value indicating whether accessing the singleton instance is allowed or not (disallowed when the instance has been destroyed on application quit)
         /// </summary>
-        public static bool CanAccessInstance => instance == null && !SingletonHelper.IsQuitting;
+        public static bool CanAccessInstance => !SingletonHelper.IsQuitting;
 
-        /// <summary>
+        /// <summary> 
         /// Gets the single class instance, if no such instance exists, a new instance will be created.
         /// </summary>
         [NotNull]
@@ -56,7 +56,7 @@ namespace Unity_Tools.Components
             get
             {
                 if (instance == null)
-                {
+                { 
                     if (SingletonHelper.IsQuitting)
                     {
                         throw new InvalidOperationException("Can't access the singleton instance after it has been destroyed and the application is quitting.");

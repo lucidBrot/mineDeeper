@@ -16,6 +16,8 @@ namespace Assets.Scripts.Frontend
 
         public GameObject BombVisual;
 
+        public Color Color;
+
         public Material DefaultFieldMaterial;
 
         public Material UnknownFieldMaterial;
@@ -23,7 +25,9 @@ namespace Assets.Scripts.Frontend
         public Material SuspectedFieldMaterial;
 
         public Material DefaultFieldMaterialHighlighted;
+
         public Material UnknownFieldMaterialHighlighted;
+
         public Material SuspectedFieldMaterialHighlighted;
 
         private BoardCell boardCell;
@@ -60,6 +64,40 @@ namespace Assets.Scripts.Frontend
             if (Text != null)
             {
                 defaultFontSize = Text.fontSize;
+            }
+
+            if (ColorProvider.CanAccessInstance)
+            {
+                ColorProvider.Instance.StyleChanged += OnStyleChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (ColorProvider.CanAccessInstance)
+            {
+                ColorProvider.Instance.StyleChanged -= OnStyleChanged;
+            }
+        }
+
+        private void OnStyleChanged()
+        {
+            UpdateColor();
+        }
+
+        public void UpdateColor()
+        {
+            if (CubeVisual != null)
+            {
+                var cubeRenderer = CubeVisual.GetComponent<Renderer>();
+                if (cubeRenderer != null)
+                {
+                    var propBlock = new MaterialPropertyBlock();
+                    cubeRenderer.GetPropertyBlock(propBlock);
+                    var color = ColorProvider.GetCubeColor(this.transform.position);
+                    propBlock.SetColor("_BaseColor", color * this.Color);
+                    cubeRenderer.SetPropertyBlock(propBlock);
+                }
             }
         }
 
