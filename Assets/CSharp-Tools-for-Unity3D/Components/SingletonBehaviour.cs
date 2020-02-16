@@ -32,8 +32,10 @@ namespace Unity_Tools.Components
     /// Base class for all MonoBehaviours that need to follow the singleton pattern. 
     /// </summary>
     /// <typeparam name="T">The type of the implementing class. Needed to provide the instance.</typeparam>
+#if UNITY_EDITOR
     [ExecuteInEditMode]
     [InitializeOnLoad]
+#endif
     public abstract class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {
         /// <summary>
@@ -116,8 +118,9 @@ namespace Unity_Tools.Components
             instance = this as T;
         }
     }
-
+#if UNITY_EDITOR
     [InitializeOnLoad]
+#endif
     internal static class SingletonHelper
     {
         /// <summary>
@@ -150,6 +153,7 @@ namespace Unity_Tools.Components
             IsQuitting = true;
         }
 
+#if UNITY_EDITOR
         [InitializeOnLoadMethod]
         private static void InitializeInEditor()
         {
@@ -172,5 +176,6 @@ namespace Unity_Tools.Components
                 }
             }
         }
+#endif
     }
 }
