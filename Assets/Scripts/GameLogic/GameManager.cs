@@ -36,6 +36,32 @@ namespace Assets.Scripts.GameLogic
             Game.Instance.StartNewGame();
         }
 
+        public static Vector3 BoardToWorldPosition(int x, int y, int z)
+        {
+            if (!CanAccessInstance || !Game.CanAccessInstance)
+            {
+                return Vector3.zero;
+            }
+            
+            var board = Game.Instance.GameBoard;
+
+            var w = board.Width;
+            var h = board.Height;
+            var d = board.Depth;
+
+            var fieldMarginSize = Instance.FieldSize + Instance.Margin;
+            var worldSize = new Vector3(w * fieldMarginSize.x, h * fieldMarginSize.y, d * fieldMarginSize.z);
+            var startPoint = -worldSize / 2f;
+
+            return startPoint + new Vector3(x * fieldMarginSize.x, y * fieldMarginSize.y,
+                       z * fieldMarginSize.z);
+        }
+
+        public static Vector3 BoardToWorldPosition(BoardCell cell)
+        {
+            return BoardToWorldPosition(cell.PosX, cell.PosY, cell.PosZ);
+        }
+
         private void OnGameboardChanged(object sender, PropertyChangedEventArgs e) 
         {
             if (e.PropertyName != nameof(Game.GameBoard))
@@ -91,6 +117,7 @@ namespace Assets.Scripts.GameLogic
                         instance.BoardCell = cell;
                         instance.transform.position = startPoint + new Vector3(x * fieldMarginSize.x, y * fieldMarginSize.y,
                                                           z * fieldMarginSize.z);
+                        instance.UpdateColor();
                         fieldVisuals.Add(instance);
                     }
                 }

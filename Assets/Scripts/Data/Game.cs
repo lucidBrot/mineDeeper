@@ -13,9 +13,27 @@ namespace Assets.Scripts.Data
 {
     public class Game : SingletonBehaviour<Game>, INotifyPropertyChanged
     {
+        private Hint _activeHint;
+
         private Board gameBoard;
-        private Hint PreviousHint;
+
         private PlayerStats playerStats;
+
+        public Hint ActiveHint
+        {
+            get => _activeHint;
+            private set
+            {
+                if (_activeHint == value)
+                {
+                    return;
+                }
+
+                var old = _activeHint;
+                _activeHint = value;
+                OnHintChanged(_activeHint, old);
+            }
+        }
 
         public Board GameBoard
         {
@@ -46,6 +64,8 @@ namespace Assets.Scripts.Data
         public int NextBoardDepth { get; set; }
 
         public int NextBombCount { get; set; }
+
+        public event EventHandler<ItemChangedEventArgs<Hint>> HintChanged;
 
         public Game()
         {
@@ -115,37 +135,39 @@ namespace Assets.Scripts.Data
 
         private void TestWhetherHintStillValid()
         {
-            if (PreviousHint != null)
+            if (ActiveHint != null)
             {
                 Hint nextHint = Solver.Solver.Hint(GameBoard);
-                if (!nextHint.IsEquivalentTo(PreviousHint))
+                if (!nextHint.IsEquivalentTo(ActiveHint))
                 {
                     UILayer.Instance.HintText = null;
-                    PreviousHint?.CellsToHighlight.ForEach(c => c.Highlighted = false);
+                    ActiveHint?.CellsToHighlight.ForEach(c => c.Highlighted = false);
+                    ActiveHint = null;
                 }
             }
         }
 
         public void RequestHint()
         {
-            Hint hint = Solver.Solver.Hint(GameBoard);
-            if (hint.IsEquivalentTo(PreviousHint))
+            var hint = Solver.Solver.Hint(GameBoard);
+            if (ActiveHint != null && hint.IsEquivalentTo(ActiveHint))
             {   // same hint requested again. Show text
                 UILayer.Instance.HintText = hint.Text;
 
-            } else { 
+            } 
+            else 
+            { 
                 PlayerStats.NumHintsRequested++;
                 RedrawHintHighlights(hint);
+                ActiveHint = hint;
             }
-
-            PreviousHint = hint;
         }
 
         public void RedrawHintHighlights([CanBeNull] Hint hint = null)
         {
             if (hint == null)
             {
-                hint = PreviousHint;
+                hint = ActiveHint;
             }
 
             if (hint == null)
@@ -205,6 +227,11 @@ namespace Assets.Scripts.Data
             {
                 boardCell.Highlighted = true;
             }
+        }
+
+        protected virtual void OnHintChanged(Hint newHint, Hint oldHint)
+        {
+            HintChanged?.Invoke(this, new ItemChangedEventArgs<Hint>(newHint, oldHint));
         }
     }
 }
