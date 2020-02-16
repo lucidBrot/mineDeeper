@@ -11,7 +11,7 @@ namespace Assets.Scripts.Tests
         [Test, Timeout(2000)]
         public void HerbertExampleSolvable()
         {
-            /*
+            /* 
              * Solution:     Given (with num bombs = 3)
              * x x 1 0       o o 1 o
              * x 3 1 0       o 3 1 o
