@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Assets.Scripts.Data;
 using NUnit.Framework;
 
 namespace Assets.Scripts.Tests
-{
+{ 
     class GeneratorTests
     {
         // A Test behaves as an ordinary method

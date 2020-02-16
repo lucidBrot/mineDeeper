@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using Assets.Scripts.Data;
 using NUnit.Framework;
 
@@ -24,5 +20,5 @@ namespace Assets.Scripts.Tests
 
             Assert.AreEqual(3, board.BombCount);
         }
-    }
+    } 
 }

@@ -3,12 +3,13 @@
 
 #region usings
 
+using Assets.Scripts.GameLogic;
 using UnityEditor;
 using UnityEngine;
 
 #endregion
 
-namespace Assets.Scripts.GameLogic.Editor
+namespace Assets.Scripts.Editor
 {
     /// <summary>
     ///     The camera behaviour editor.
