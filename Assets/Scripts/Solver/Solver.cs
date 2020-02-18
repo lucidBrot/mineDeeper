@@ -322,7 +322,7 @@ namespace Assets.Scripts.Solver
             foreach (BoardCell possibleBomb1 in unrevealedNeighbors)
             {
                 // would that bomb even be valid?
-                if (board.NeighborsOf(possibleBomb1).Any(
+                if (board.NeighborsOf(possibleBomb1).Where(cll => cll.State == CellState.Revealed).Any(
                     // has already enough bombs
                     c => board.NeighborsOf(c).Count(n => (n.IsBomb && n.State == CellState.Revealed) || n.State == CellState.Suspect) >= c.AdjacentBombCount
                     ))
@@ -342,7 +342,7 @@ namespace Assets.Scripts.Solver
                     }
 
                     // would that bomb2 even be valid?
-                    if (board.NeighborsOf(possibleBomb2).Any(
+                    if (board.NeighborsOf(possibleBomb2).Where(cll => cll.State == CellState.Revealed).Any(
                         // has already enough bombs
                         c => board.NeighborsOf(c).Count(n => (n.State == CellState.Revealed && n.IsBomb) || n.State == CellState.Suspect) >=
                              c.AdjacentBombCount
