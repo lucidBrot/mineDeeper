@@ -293,12 +293,6 @@ namespace Assets.Scripts.Solver
             return false;
         }
 
-        private bool CellAcceptsAnotherNNeighboringBombs(BoardCell cell, int n)
-        {
-            return cell.AdjacentBombCount >=
-                   n + board.NeighborsOf(cell).Count(c => c.IsBomb || c.State == CellState.Suspect);
-        }
-
         private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard, [CanBeNull] out Tuple<BoardCell, BoardCell> bombsFound)
         {
             // by default, we found nothing
