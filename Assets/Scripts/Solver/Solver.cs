@@ -7,6 +7,7 @@ using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
 using Assets.Scripts.Solver.Rules;
 using JetBrains.Annotations;
+using Unity_Tools.Core;
 using UnityEngine;
 
 namespace Assets.Scripts.Solver
@@ -265,24 +266,18 @@ namespace Assets.Scripts.Solver
         /// <returns>Whether the noteBoard has been modified during this call</returns>
         private bool ConsiderAllNeighborsAreSafe(BoardCell cell, bool modifyBoard)
         {
-            if (cell.State != CellState.Revealed)
+            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
+            IRule rule = new AllNeighborsAreSafeRule();
+            bool computationAdvanced = rule.Consider(this.board, cell, report);
+            // reveal all cells that should be revealed. They are set to targetState revealed in the report.
+            if (modifyBoard)
             {
-                return false;
+                report.Where(c => c.TargetState == CellState.Revealed).Distinct()
+                    .ForAll(cc => 
+                        board.Reveal(board[cc.PosX, cc.PosY, cc.PosZ]
+                        ));
             }
-
-            if (cell.IsNude)
-            {
-                var hadUnrevealed = false;
-                board.ForEachNeighbor(cell, c => hadUnrevealed |= c.State != CellState.Revealed);
-                if (hadUnrevealed && modifyBoard)
-                {
-                    board.Reveal(cell);
-                }
-
-                return hadUnrevealed;
-            }
-
-            return false;
+            return computationAdvanced;
         }
 
         /// <summary>
