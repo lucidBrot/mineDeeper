@@ -72,7 +72,7 @@ namespace Assets.Scripts.Generator
             var solver = new Solver.Solver(board);
             var tries = 0;
 
-            while (!solver.IsSolvable(out bool aborted))
+            while (!solver.IsSolvable())
             {
                 tries++;
 

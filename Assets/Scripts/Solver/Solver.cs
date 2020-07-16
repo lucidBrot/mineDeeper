@@ -18,6 +18,8 @@ namespace Assets.Scripts.Solver
         /// Used to notice when an Abort() has been requested.
         /// </summary>
         private bool ShouldAbort { get; set; }
+        
+        public bool HasAborted { get; private set; }
 
         /// <summary>
         /// Used for code legibility as a constant to denote that we aborted the solver and returned `false`
@@ -35,26 +37,16 @@ namespace Assets.Scripts.Solver
         /// Expects a board that already offers information to the player.
         /// </summary>
         /// <returns>True if the board is solvable without guessing, False otherwise</returns>
-        public bool IsSolvable(out bool aborted)
-        {
-            bool ret = Compute(out bool ab);
-            aborted = ab;
-            return ret;
-        }
-
-        /// <summary>
-        /// Like <see cref="IsSolvable(out bool)">IsSolvable</see> but ignores the possibility that the Solver was aborted.
-        /// </summary>
-        /// <returns></returns>
         public bool IsSolvable()
         {
-            return IsSolvable(out bool b);
+            return Compute();
         }
 
-        private bool Compute(out bool aborted)
+
+        private bool Compute()
         {
             this.ShouldAbort = false;
-            aborted = false;
+            this.HasAborted = false;
             while (this.numUnfoundBombs > 0)
             {
                 var computationAdvancedThisTurn = false;
@@ -62,7 +54,7 @@ namespace Assets.Scripts.Solver
                 {
                     if (ShouldAbort)
                     {
-                        aborted = true;
+                        this.HasAborted = true;
                         return ABORTED;
                     }
                     // below assertion is wrong because it should also consider the amount of revealed neighboring bombs
