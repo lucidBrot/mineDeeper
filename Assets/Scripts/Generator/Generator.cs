@@ -14,7 +14,17 @@ namespace Assets.Scripts.Generator
         }
 
         /// <summary>
+        /// Used to notice when the user requests the generator computation to stop.
+        /// </summary>
+        private bool ShouldAbort { get; set; }
+        /// <summary>
+        /// Used as return Board when we are aborting. This is just for clarity.
+        /// </summary>
+        private const Board ABORTED = null;
+        
+        /// <summary>
         /// Generates a board with an arbitrary initial guess. Tries to solve that board, and if that works, returns it.
+        /// Returns <code>null</code> if it was abort()'ed.
         /// </summary>
         /// <param name="boardWidth"></param>
         /// <param name="boardHeight"></param>
@@ -23,6 +33,9 @@ namespace Assets.Scripts.Generator
         /// <returns></returns>
         public Board Generate (uint boardWidth, uint boardHeight, uint boardDepth, uint numBombs, bool disableSolving = false)
         {
+            // reset this.ShouldAbort just to safeguard against Generator reuse after abort() has been called.
+            this.ShouldAbort = false;
+            
             if (boardWidth * boardHeight * boardDepth < numBombs)
             {
                 throw new ArgumentException("Number of bombs is larger than the Board");
@@ -33,6 +46,7 @@ namespace Assets.Scripts.Generator
 
             for (uint bombCount = 0; bombCount < numBombs; bombCount++)
             {
+                if (this.ShouldAbort) {return ABORTED;}
                 PlaceBombRandomlyOnBoard(board);
             }
             seedCoordTuple = SeedFirstNude(board);
@@ -42,6 +56,8 @@ namespace Assets.Scripts.Generator
             {
                 return board;
             }
+            
+            if (this.ShouldAbort) {return ABORTED;}
 
             var solver = new Solver.Solver(board);
             var tries = 0;
@@ -54,6 +70,8 @@ namespace Assets.Scripts.Generator
                 {
                     throw new EricException();
                 }
+                
+                if (this.ShouldAbort) {return ABORTED;}
 
                 Debug.Log("Trying again, round " + tries);
 
@@ -61,16 +79,17 @@ namespace Assets.Scripts.Generator
 
                 for (var i = 0u; i < numBombs; i++)
                 {
+                    if (this.ShouldAbort) {return ABORTED;}
                     PlaceBombRandomlyOnBoard(board);
                 }
                 seedCoordTuple = SeedFirstNude(board);
             }
 
+            if (this.ShouldAbort) {return ABORTED;}
             board.ResetCellStates();
             // board.Reveal(board[seedCoordTuple.Item1, seedCoordTuple.Item2, seedCoordTuple.Item3]);
             var (a, b, c) = seedCoordTuple;
             board[a, b, c].State = CellState.Revealed;
-            // TODO: Animate Reveal
             return board;
         }
 
@@ -129,5 +148,14 @@ namespace Assets.Scripts.Generator
                 board.SetBombState(posx, posy, posz, true);
             }
         }
+
+        /// <summary>
+        /// Abort the Generator as soon as befitting it, discarding any useful result.
+        /// </summary>
+        protected void Abort()
+        {
+            this.ShouldAbort = true;
+        }
+
     }
 }
