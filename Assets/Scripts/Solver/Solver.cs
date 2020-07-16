@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
+using Assets.Scripts.Solver.Rules;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -289,38 +291,23 @@ namespace Assets.Scripts.Solver
         /// <returns>Whether the noteBoard has been modified</returns>
         private bool ConsiderAllHiddenNeighborsAreBombs(BoardCell cell, bool modifyBoard)
         {
-            // skip cells we know nothing of and nude cells
-            if (cell.State != CellState.Revealed || cell.IsNude)
+            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
+            IRule rule = new AllHiddenNeighborsAreBombsRule();
+            int numNewBombsFound = 0; // todo: for paralellization, consider carefully how the unfoundBombs are updated! Best is only once, to avoid counting the same finding twice.
+            bool computationAdvanced = rule.Consider(this.board, cell, report, out numNewBombsFound);
+            if (modifyBoard)
             {
-                return false;
-            }
-
-            var unrevealedNeighborAmount = board.CountNeighbors(cell, c => c.State != CellState.Revealed);
-            var revealedNeighborBombsAmount =
-                board.CountNeighbors(cell, c => c.State == CellState.Revealed && c.IsBomb);
-
-            if (cell.AdjacentBombCount - revealedNeighborBombsAmount == unrevealedNeighborAmount)
-            {
-                var hasChanges = false;
-
-                board.ForEachNeighbor(cell, c =>
+                // todo: take rule instance from more global list and set new state to board once (and not just everything for each rule)
+                // i.e. below block shall be removed soon
+                foreach (var c in report)
                 {
-                    if (c.State != CellState.Revealed && c.State != CellState.Suspect)
-                    {
-                        if (modifyBoard)
-                        {
-                            c.State = CellState.Suspect;
-                        }
-
-                        hasChanges = true;
-                        numUnfoundBombs--;
-                    }
-                });
-
-                return hasChanges;
+                    this.board[c.PosX, c.PosY, c.PosZ].State = c.TargetState;
+                }
             }
 
-            return false;
+            this.numUnfoundBombs -= numNewBombsFound;
+
+            return computationAdvanced;
         }
 
         private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard, [CanBeNull] out Tuple<BoardCell, BoardCell> bombsFound)
