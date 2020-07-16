@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
@@ -12,6 +13,17 @@ namespace Assets.Scripts.Solver
     {
         private readonly Board board;
         private int numUnfoundBombs;
+        
+        /// <summary>
+        /// Used to notice when an Abort() has been requested.
+        /// </summary>
+        private bool ShouldAbort { get; set; }
+
+        /// <summary>
+        /// Used for code legibility as a constant to denote that we aborted the solver and returned `false`
+        /// because we did not find the board to be solvable
+        /// </summary>
+        private const bool ABORTED = false;
 
         public Solver(Board board)
         {
@@ -23,18 +35,36 @@ namespace Assets.Scripts.Solver
         /// Expects a board that already offers information to the player.
         /// </summary>
         /// <returns>True if the board is solvable without guessing, False otherwise</returns>
-        public bool IsSolvable()
+        public bool IsSolvable(out bool aborted)
         {
-            return Compute();
+            bool ret = Compute(out bool ab);
+            aborted = ab;
+            return ret;
         }
 
-        private bool Compute()
+        /// <summary>
+        /// Like <see cref="IsSolvable(out bool)">IsSolvable</see> but ignores the possibility that the Solver was aborted.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsSolvable()
         {
+            return IsSolvable(out bool b);
+        }
+
+        private bool Compute(out bool aborted)
+        {
+            this.ShouldAbort = false;
+            aborted = false;
             while (this.numUnfoundBombs > 0)
             {
                 var computationAdvancedThisTurn = false;
                 foreach (BoardCell cell in this.board.Cells)
                 {
+                    if (ShouldAbort)
+                    {
+                        aborted = true;
+                        return ABORTED;
+                    }
                     // below assertion is wrong because it should also consider the amount of revealed neighboring bombs
                     //Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
                     if (cell.IsBomb && cell.State == CellState.Revealed)
@@ -404,5 +434,13 @@ namespace Assets.Scripts.Solver
             return true;
 
         }
+        /// <summary>
+        /// Abort the Solver as soon as befitting it, discarding any useful result.
+        /// </summary>
+        public void Abort()
+        {
+            this.ShouldAbort = true;
+        }
+
     }
 }

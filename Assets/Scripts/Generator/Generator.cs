@@ -8,8 +8,8 @@ using Random = UnityEngine.Random;
 namespace Assets.Scripts.Generator
 {
     public class Generator
-    { 
-        public Generator ()
+    {
+        public Generator()
         {
         }
 
@@ -17,11 +17,12 @@ namespace Assets.Scripts.Generator
         /// Used to notice when the user requests the generator computation to stop.
         /// </summary>
         private bool ShouldAbort { get; set; }
+
         /// <summary>
         /// Used as return Board when we are aborting. This is just for clarity.
         /// </summary>
         private const Board ABORTED = null;
-        
+
         /// <summary>
         /// Generates a board with an arbitrary initial guess. Tries to solve that board, and if that works, returns it.
         /// Returns <code>null</code> if it was abort()'ed.
@@ -31,24 +32,30 @@ namespace Assets.Scripts.Generator
         /// <param name="boardDepth"></param>
         /// <param name="numBombs"></param>
         /// <returns></returns>
-        public Board Generate (uint boardWidth, uint boardHeight, uint boardDepth, uint numBombs, bool disableSolving = false)
+        public Board Generate(uint boardWidth, uint boardHeight, uint boardDepth, uint numBombs,
+            bool disableSolving = false)
         {
             // reset this.ShouldAbort just to safeguard against Generator reuse after abort() has been called.
             this.ShouldAbort = false;
-            
+
             if (boardWidth * boardHeight * boardDepth < numBombs)
             {
                 throw new ArgumentException("Number of bombs is larger than the Board");
             }
 
-            var board = new Board((int)boardWidth, (int)boardHeight, (int)boardDepth);
+            var board = new Board((int) boardWidth, (int) boardHeight, (int) boardDepth);
             (int, int, int) seedCoordTuple;
 
             for (uint bombCount = 0; bombCount < numBombs; bombCount++)
             {
-                if (this.ShouldAbort) {return ABORTED;}
+                if (this.ShouldAbort)
+                {
+                    return ABORTED;
+                }
+
                 PlaceBombRandomlyOnBoard(board);
             }
+
             seedCoordTuple = SeedFirstNude(board);
 
             // return early for tests that are afraid of endless retries (i.e. tests that don't care about the solver)
@@ -56,13 +63,16 @@ namespace Assets.Scripts.Generator
             {
                 return board;
             }
-            
-            if (this.ShouldAbort) {return ABORTED;}
+
+            if (this.ShouldAbort)
+            {
+                return ABORTED;
+            }
 
             var solver = new Solver.Solver(board);
             var tries = 0;
 
-            while (!solver.IsSolvable())
+            while (!solver.IsSolvable(out bool aborted))
             {
                 tries++;
 
@@ -70,8 +80,12 @@ namespace Assets.Scripts.Generator
                 {
                     throw new EricException();
                 }
-                
-                if (this.ShouldAbort) {return ABORTED;}
+
+                if (this.ShouldAbort)
+                {
+                    solver.Abort();
+                    return ABORTED;
+                }
 
                 Debug.Log("Trying again, round " + tries);
 
@@ -79,13 +93,24 @@ namespace Assets.Scripts.Generator
 
                 for (var i = 0u; i < numBombs; i++)
                 {
-                    if (this.ShouldAbort) {return ABORTED;}
+                    if (this.ShouldAbort)
+                    {
+                        solver.Abort();
+                        return ABORTED;
+                    }
+
                     PlaceBombRandomlyOnBoard(board);
                 }
+
                 seedCoordTuple = SeedFirstNude(board);
             }
 
-            if (this.ShouldAbort) {return ABORTED;}
+            if (this.ShouldAbort)
+            {
+                solver.Abort();
+                return ABORTED;
+            }
+
             board.ResetCellStates();
             // board.Reveal(board[seedCoordTuple.Item1, seedCoordTuple.Item2, seedCoordTuple.Item3]);
             var (a, b, c) = seedCoordTuple;
@@ -97,10 +122,11 @@ namespace Assets.Scripts.Generator
         {
             // if possible, choose a cell at the surface
             BoardCell nude = board.FirstOrDefault(cell => cell.IsNude && (
-                                    cell.PosX == 0 || cell.PosY == 0 || cell.PosZ == 0
-                                    || cell.PosX == board.Width-1 || cell.PosY == board.Height-1 ||
-                                    cell.PosZ == board.Depth-1)
-                                );
+                cell.PosX == 0 || cell.PosY == 0 || cell.PosZ == 0
+                || cell.PosX == board.Width - 1 ||
+                cell.PosY == board.Height - 1 ||
+                cell.PosZ == board.Depth - 1)
+            );
             if (nude != null)
             {
                 nude.State = CellState.Revealed;
@@ -152,10 +178,9 @@ namespace Assets.Scripts.Generator
         /// <summary>
         /// Abort the Generator as soon as befitting it, discarding any useful result.
         /// </summary>
-        protected void Abort()
+        public void Abort()
         {
             this.ShouldAbort = true;
         }
-
     }
 }
