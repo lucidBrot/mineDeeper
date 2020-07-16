@@ -293,8 +293,14 @@ namespace Assets.Scripts.Solver
         {
             ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
             IRule rule = new AllHiddenNeighborsAreBombsRule();
-            int numNewBombsFound = 0; // todo: for paralellization, consider carefully how the unfoundBombs are updated! Best is only once, to avoid counting the same finding twice.
-            bool computationAdvanced = rule.Consider(this.board, cell, report, out numNewBombsFound);
+            bool computationAdvanced = rule.Consider(this.board, cell, report);
+            
+            // todo: for paralellization, consider carefully how the unfoundBombs are updated! Best is only once, to avoid counting the same finding twice. Probably should compute it from the list instead and remove the out param.
+            // Count number of found Bombs
+            int numNewBombsFound = report.Distinct().Count(rep => rep.TargetState == CellState.Suspect);
+            this.numUnfoundBombs -= numNewBombsFound;
+            
+            // update board if that is wished for
             if (modifyBoard)
             {
                 // todo: take rule instance from more global list and set new state to board once (and not just everything for each rule)
@@ -304,8 +310,6 @@ namespace Assets.Scripts.Solver
                     this.board[c.PosX, c.PosY, c.PosZ].State = c.TargetState;
                 }
             }
-
-            this.numUnfoundBombs -= numNewBombsFound;
 
             return computationAdvanced;
         }
