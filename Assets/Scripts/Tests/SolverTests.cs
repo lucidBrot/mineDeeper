@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Assets.Scripts.Data;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Assets.Scripts.Tests
 {
@@ -207,8 +209,14 @@ namespace Assets.Scripts.Tests
             testBoard[0, 1, 1].State = CellState.Revealed;
             testBoard[1, 1, 1].State = CellState.Revealed;
             Solver.Solver solver = new Solver.Solver(testBoard);
-            var Blubb = Task.Run(() => solver.IsSolvable());
+            var Blubb = Task.Run(() =>
+            {
+                var res = solver.IsSolvable();
+                Debug.Log("solving done!");
+                return res;
+            });
             solver.Abort();
+            Debug.Log("aborted.");
             bool solvable = Blubb.Result;
             Assert.AreEqual(false, solvable, "Gandalf 3D the white shall not pass.");
             Assert.AreEqual(true, solver.HasAborted, "Gandalf 3D the grey shall not pass.");

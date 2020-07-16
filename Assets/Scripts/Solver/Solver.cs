@@ -31,6 +31,8 @@ namespace Assets.Scripts.Solver
         {
             this.board = board;
             this.numUnfoundBombs = board.BombCount;
+            this.ShouldAbort = false;
+            this.HasAborted = false;
         }
 
         /// <summary>
@@ -39,14 +41,19 @@ namespace Assets.Scripts.Solver
         /// <returns>True if the board is solvable without guessing, False otherwise</returns>
         public bool IsSolvable()
         {
+            if (this.HasAborted)
+            {
+                // safeguard to avoid accidental reuse of solver. 
+                // if you were to reuse an aborted solver without having reset ShouldAbort and HasAborted to false,
+                // you would not be able to abort it or it would abort itself.
+                return ABORTED;
+            }
             return Compute();
         }
 
 
         private bool Compute()
         {
-            this.ShouldAbort = false;
-            this.HasAborted = false;
             while (this.numUnfoundBombs > 0)
             {
                 var computationAdvancedThisTurn = false;
@@ -57,6 +64,7 @@ namespace Assets.Scripts.Solver
                         this.HasAborted = true;
                         return ABORTED;
                     }
+                    
                     // below assertion is wrong because it should also consider the amount of revealed neighboring bombs
                     //Debug.Assert(cell.AdjacentBombCount <= board.CountNeighbors(cell, c => c.State != CellState.Revealed));
                     if (cell.IsBomb && cell.State == CellState.Revealed)
