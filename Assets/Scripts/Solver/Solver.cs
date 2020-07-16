@@ -58,10 +58,6 @@ namespace Assets.Scripts.Solver
 
                     if (!computationAdvancedThisTurn)
                     {
-                        if (cell.PosX == 2 && cell.PosY == 2 && cell.PosZ == 0)
-                        {
-                            var a = 1;
-                        }
                         computationAdvancedThisTurn = ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
                     }
 
@@ -153,7 +149,7 @@ namespace Assets.Scripts.Solver
                     return new Hint(cell,
                         Data.Hint.HintTypes.ThereIsOnlyOneLegalOptionToArrangeTheTwoMissingBombs,
                         "There is only one way the two missing bombs around " + cell.ToString() + " can be placed.",
-                        l);
+                        cell);
                 }
 
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
@@ -297,12 +293,6 @@ namespace Assets.Scripts.Solver
             return false;
         }
 
-        private bool CellAcceptsAnotherNNeighboringBombs(BoardCell cell, int n)
-        {
-            return cell.AdjacentBombCount >=
-                   n + board.NeighborsOf(cell).Count(c => c.IsBomb || c.State == CellState.Suspect);
-        }
-
         private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard, [CanBeNull] out Tuple<BoardCell, BoardCell> bombsFound)
         {
             // by default, we found nothing
@@ -332,7 +322,7 @@ namespace Assets.Scripts.Solver
             foreach (BoardCell possibleBomb1 in unrevealedNeighbors)
             {
                 // would that bomb even be valid?
-                if (board.NeighborsOf(possibleBomb1).Any(
+                if (board.NeighborsOf(possibleBomb1).Where(cll => cll.State == CellState.Revealed).Any(
                     // has already enough bombs
                     c => board.NeighborsOf(c).Count(n => (n.IsBomb && n.State == CellState.Revealed) || n.State == CellState.Suspect) >= c.AdjacentBombCount
                     ))
@@ -352,7 +342,7 @@ namespace Assets.Scripts.Solver
                     }
 
                     // would that bomb2 even be valid?
-                    if (board.NeighborsOf(possibleBomb2).Any(
+                    if (board.NeighborsOf(possibleBomb2).Where(cll => cll.State == CellState.Revealed).Any(
                         // has already enough bombs
                         c => board.NeighborsOf(c).Count(n => (n.State == CellState.Revealed && n.IsBomb) || n.State == CellState.Suspect) >=
                              c.AdjacentBombCount

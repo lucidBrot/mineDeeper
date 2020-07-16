@@ -11,7 +11,7 @@ namespace Assets.Scripts.Tests
         [Test, Timeout(2000)]
         public void HerbertExampleSolvable()
         {
-            /*
+            /* 
              * Solution:     Given (with num bombs = 3)
              * x x 1 0       o o 1 o
              * x 3 1 0       o 3 1 o
@@ -27,7 +27,8 @@ namespace Assets.Scripts.Tests
             testBoard[2, 1, 0].State = CellState.Revealed;
             Solver.Solver solver = new Solver.Solver(testBoard);
 
-            Assert.AreEqual(true, solver.IsSolvable(), "HerbertExample should be solvable");
+            Assert.AreEqual(true, solver.IsSolvable(), "HerbertExample should be solvable but that functionality is not implemented yet. See " +
+                                                       "ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal for inspiration");
         }
 
         [Test]
@@ -149,6 +150,42 @@ namespace Assets.Scripts.Tests
             Solver.Solver solver = new Solver.Solver(testBoard);
 
             Assert.AreEqual(true, solver.IsSolvable(), "TaelurExample should be solvable");
+        }
+
+        [Test, Timeout(2000)]
+        public void Gandalf2DExampleNotSolvable()
+        {
+            // This should not be solvable
+            /*                    given:
+             * x 2 x                ? 2 ?
+             * 1 2 1                ? 2 ?
+             * 0 0 0                0 0 0
+             */
+            Board testBoard = new Board(3, 3, 1);
+            testBoard.SetBombState(0, 0, 0, true);
+            testBoard.SetBombState(0, 2, 0, true);
+            testBoard[0, 1, 0].State = CellState.Revealed;
+            testBoard[1, 1, 0].State = CellState.Revealed;
+            Solver.Solver solver = new Solver.Solver(testBoard);
+            Assert.AreEqual(false, solver.IsSolvable(), "Gandalf shall not pass");
+        }
+
+        [Test, Timeout(2000)]
+        public void Gandalf3DExampleNotSolvable()
+        {
+            // This should not be solvable
+            /*                    given:
+             * x 2 x                ? 2 ?
+             * 1 2 1                ? 2 ?
+             * 0 0 0                0 0 0
+             */
+            Board testBoard = new Board(3, 3, 3);
+            testBoard.SetBombState(0, 0, 1, true);
+            testBoard.SetBombState(0, 2, 1, true);
+            testBoard[0, 1, 1].State = CellState.Revealed;
+            testBoard[1, 1, 1].State = CellState.Revealed;
+            Solver.Solver solver = new Solver.Solver(testBoard);
+            Assert.AreEqual(false, solver.IsSolvable(), "Gandalf 3D shall not pass");
         }
     }
 }
