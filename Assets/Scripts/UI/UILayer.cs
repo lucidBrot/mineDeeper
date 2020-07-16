@@ -1,12 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using Assets.Scripts;
+﻿using System.ComponentModel;
 using Assets.Scripts.Data;
 using TMPro;
 using Unity_Tools.Components;
 using UnityEngine;
-using UnityEngine.Experimental.PlayerLoop;
 
 public class UILayer : SingletonBehaviour<UILayer>
 {
