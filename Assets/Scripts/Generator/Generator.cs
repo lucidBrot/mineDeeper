@@ -2,7 +2,7 @@
 using System.Linq;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
-using UnityEngine;
+
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts.Generator
@@ -87,7 +87,8 @@ namespace Assets.Scripts.Generator
                     return ABORTED;
                 }
 
-                Debug.Log("Trying again, round " + tries);
+                /// Commented out because Unity.Engine is not threadsafe
+                ///Debug.Log("Trying again, round " + tries);
 
                 board.ResetBoard();
 
@@ -133,7 +134,8 @@ namespace Assets.Scripts.Generator
                 return (nude.PosX, nude.PosY, nude.PosZ);
             }
 
-            Debug.Log("Did not find surface nudes.");
+            // commented out because Unity Engine is not threadsafe.
+            /// Debug.Log("Did not find surface nudes.");
             foreach (BoardCell cell in board.Cells)
             {
                 if (cell.IsNude)
@@ -159,9 +161,10 @@ namespace Assets.Scripts.Generator
 
         private void PlaceBombRandomlyOnBoard(Board board)
         {
-            int posx = Random.Range(0, board.Width);
-            int posy = Random.Range(0, board.Height);
-            int posz = Random.Range(0, board.Depth);
+            var brandon = new System.Random();
+            int posx = brandon.Next(0, board.Width);
+            int posy = brandon.Next(0, board.Height);
+            int posz = brandon.Next(0, board.Depth);
             BoardCell cell = board[posx, posy, posz];
 
             if (board[posx, posy, posz].IsBomb)

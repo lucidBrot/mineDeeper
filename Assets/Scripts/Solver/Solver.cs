@@ -8,7 +8,6 @@ using Assets.Scripts.GameLogic;
 using Assets.Scripts.Solver.Rules;
 using JetBrains.Annotations;
 using Unity_Tools.Core;
-using UnityEngine;
 
 namespace Assets.Scripts.Solver
 {
@@ -95,7 +94,8 @@ namespace Assets.Scripts.Solver
                         continue;
                     }
 
-                    Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
+                    // Commented out because UnityEngine is not threadsafe
+                    ///Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
 
                     foreach (var rule in rules)
                     {
@@ -149,7 +149,8 @@ namespace Assets.Scripts.Solver
                 {
                     continue;
                 }
-                Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
+                // Commented out because UnityEngine is not threadsafe
+                ///Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
                 
                 // generate a Hint if possible
                 foreach (var hintRule in solver.hintRules) {

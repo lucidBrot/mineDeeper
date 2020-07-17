@@ -3,6 +3,8 @@ using System.Collections;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Assets.Scripts.GameLogic;
 using JetBrains.Annotations;
 using Unity.Collections.LowLevel.Unsafe;
@@ -75,11 +77,24 @@ namespace Assets.Scripts.Data
             NextBombCount = 50;
         }
 
+        private Generator.Generator _lastStartedGenerator;
         public void StartNewGame()
         {
-            var generator = new Generator.Generator();
-            GameBoard = generator.Generate((uint) NextBoardWidth, (uint) NextBoardHeight, (uint) NextBoardDepth,
-                (uint) NextBombCount);
+            // Abort generator that is currently running
+            _lastStartedGenerator?.Abort();
+            // Create new generator to avoid issues with reuse after aborting - not certain if necessary.
+            _lastStartedGenerator = new Generator.Generator();
+            // Generate in background Thread
+            MainThreadDispatch.Initialize();
+            Task task = Task.Run(() =>
+            {
+                Thread.Sleep(4000);
+                Board board = _lastStartedGenerator.Generate((uint) NextBoardWidth, (uint) NextBoardHeight,
+                    (uint) NextBoardDepth,
+                    (uint) NextBombCount);
+                MainThreadDispatch.InvokeAsync(() => { GameBoard = board;});
+            });
+
             PlayerStats = new PlayerStats();
         }
 
