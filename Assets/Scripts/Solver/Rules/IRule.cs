@@ -50,6 +50,11 @@ namespace Assets.Scripts.Solver.Rules
             this.TargetState = targetState;
         }
 
+        public ConsiderationReportForCell(BoardCell c, CellState state): this(c.PosX, c.PosY, c.PosZ, state)
+        {
+            
+        }
+
         public bool Equals(ConsiderationReportForCell other)
         {
             return PosX == other.PosX && PosY == other.PosY && PosZ == other.PosZ && TargetState == other.TargetState;

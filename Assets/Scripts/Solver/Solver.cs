@@ -98,8 +98,7 @@ namespace Assets.Scripts.Solver
                     {
                         // this is a more costly operation and hence should only be tried if others don't help
                         computationAdvancedThisTurn =
-                            ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard: true,
-                                out _);
+                            ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard: true);
                     }
 
                     if (computationAdvancedThisTurn)
@@ -166,19 +165,8 @@ namespace Assets.Scripts.Solver
 
                 // this is a more costly operation and it is harder for the user to see
                 Tuple<BoardCell, BoardCell> bombPair;
-                if (solver.ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard:false, out bombPair))
+                if (solver.ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard:false))
                 {
-                    List<BoardCell> l;
-                    if (bombPair == null)
-                    {
-                        Debug.Log("bombPair for hint is null, but a solution was found. This should never happen. Highlighting the concerned Cell...");
-                        l = new List<BoardCell>() {cell};
-                    }
-                    else
-                    {
-                        l = new List<BoardCell>() {bombPair.Item1, bombPair.Item2};
-                    }
-
                     return new Hint(cell,
                         Data.Hint.HintTypes.ThereIsOnlyOneLegalOptionToArrangeTheTwoMissingBombs,
                         "There is only one way the two missing bombs around " + cell.ToString() + " can be placed.",
@@ -199,6 +187,7 @@ namespace Assets.Scripts.Solver
 
         /// <summary>
         /// Hints about absolutely obviously wrong suspects
+        /// Hence this is not useful for the Solver but is useful for hints.
         /// </summary>
         /// <param name="board"></param>
         /// <param name="wronglyFlaggedCell"></param>
@@ -293,117 +282,24 @@ namespace Assets.Scripts.Solver
             return computationAdvanced;
         }
 
-        private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard, [CanBeNull] out Tuple<BoardCell, BoardCell> bombsFound)
+        private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard)
         {
-            // by default, we found nothing
-            bombsFound = null;
-
-            // skip cells we know nothing of and nude cells
-            if (cell.State != CellState.Revealed || cell.IsNude)
-            {
-                return false;
-            }
-
-            // consider only cells with exactly 2 missing bombs
-            if (cell.AdjacentBombCount - 
-                board.NeighborsOf(cell).Count(
-                    c => c.State == CellState.Suspect || (c.IsBomb && c.State == CellState.Revealed)) != 2
-                )
-            {
-                return false;
-            }
-
-            // we will want to store all possibilities
-            List<Tuple<BoardCell, BoardCell>> possibleBombPairs = new List<Tuple<BoardCell, BoardCell>>(2);
-
-            // get all unrevealed neighbors - those could be bombs
-            var unrevealedNeighbors = board.NeighborsOf(cell).Where(c => c.State != CellState.Revealed)
-                .OrderBy(x => x.PosX).ThenBy(x => x.PosY).ThenBy(x => x.PosZ).ToList();
-            foreach (BoardCell possibleBomb1 in unrevealedNeighbors)
-            {
-                // would that bomb even be valid?
-                if (board.NeighborsOf(possibleBomb1).Where(cll => cll.State == CellState.Revealed).Any(
-                    // has already enough bombs
-                    c => board.NeighborsOf(c).Count(n => (n.IsBomb && n.State == CellState.Revealed) || n.State == CellState.Suspect) >= c.AdjacentBombCount
-                    ))
-                {
-                    continue;
-                }
-
-                // try all other bombs
-                var unrevealedNeighborsReversed = Enumerable.Reverse(unrevealedNeighbors);
-                foreach (BoardCell possibleBomb2 in unrevealedNeighborsReversed)
-                {
-                    // we only need to consider each couple (a, b) once.
-                    // Since the inner loop is reversed, we can stop the inner loop once a == b
-                    if (possibleBomb1 == possibleBomb2)
-                    {
-                        break;
-                    }
-
-                    // would that bomb2 even be valid?
-                    if (board.NeighborsOf(possibleBomb2).Where(cll => cll.State == CellState.Revealed).Any(
-                        // has already enough bombs
-                        c => board.NeighborsOf(c).Count(n => (n.State == CellState.Revealed && n.IsBomb) || n.State == CellState.Suspect) >=
-                             c.AdjacentBombCount
-                    ))
-                    {
-                        continue;
-                    }
-
-                    // Each possibleBomb on its own would be valid. Would the combination still be?
-                    // Check all cells that are neighbors of of both bombs for whether they disagree
-                    bool atLeastOneJudgeDisagrees = false;
-                    var neighborsOfBothPossibleBombs = board.NeighborsOf(possibleBomb1)
-                        .Intersect(board.NeighborsOf(possibleBomb2));
-                    foreach (BoardCell judge in neighborsOfBothPossibleBombs.Where(c => c.State == CellState.Revealed && !c.IsBomb))
-                    {
-                        if (board.NeighborsOf(judge)
-                                     .Count(n => (n.State == CellState.Revealed 
-                                            && n.IsBomb ) || n.State == CellState.Suspect) 
-                                            + 2 > judge.AdjacentBombCount
-                        )
-                        {
-                            // at least one judge disagrees. Do not store this option and continue checking other options
-                            atLeastOneJudgeDisagrees = true;
-                            break;
-                        }
-                    }
-
-                    if (!atLeastOneJudgeDisagrees)
-                    {
-                        // everything fine, store this as a possible option
-                        possibleBombPairs.Add(new Tuple<BoardCell, BoardCell>(possibleBomb1, possibleBomb2));
-                        if (possibleBombPairs.Count > 1)
-                        {
-                            // too many options - the solution is not unique
-                            return false;
-                        }
-                    }
-
-                }
-
-            }
-
-            if(possibleBombPairs.Count == 0)
-            {
-                // nothing found
-                return false;
-            }
-
-            Debug.Assert(possibleBombPairs.Count == 1);
-
+            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
+            IRule rule = new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegal();
+            bool computationAdvanced = rule.Consider(this.board, cell, report);
             if (modifyBoard)
             {
-                possibleBombPairs[0].Item1.State = CellState.Suspect;
-                possibleBombPairs[0].Item2.State = CellState.Suspect;
-                numUnfoundBombs -= 2;
+                report.Where(c => c.TargetState == CellState.Suspect).Distinct()
+                    .ForAll(cc =>
+                    {
+                        numUnfoundBombs--;
+                        board[cc.PosX, cc.PosY, cc.PosZ].State = CellState.Suspect;
+                    });
             }
 
-            bombsFound = possibleBombPairs[0];
-            return true;
-
+            return computationAdvanced;
         }
+        
         /// <summary>
         /// Abort the Solver as soon as befitting it, discarding any useful result.
         /// </summary>

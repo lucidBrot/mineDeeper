@@ -4,6 +4,9 @@ using Assets.Scripts.GameLogic;
 
 namespace Assets.Scripts.Solver.Rules
 {
+    /// <summary>
+    /// if the number of adjacent uncertainties equals 0, every uncertainty is safe
+    /// </summary>
     public class AllNeighborsAreSafeRule : IRule
     {
         public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)

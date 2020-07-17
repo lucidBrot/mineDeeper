@@ -5,6 +5,10 @@ using Assets.Scripts.GameLogic;
 
 namespace Assets.Scripts.Solver.Rules
 {
+    /// <summary>
+    /// If there are already N suspects among the neighbors of the cell,
+    /// then the remaining neighbors are all clean and can be revealed.
+    /// </summary>
     public class LackOfRemainingAdjacentBombsRule : IRule
     {
         public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
