@@ -194,7 +194,7 @@ namespace Assets.Scripts.Solver
         /// <returns>null if no hint found, otherwise a hint</returns>
         private static Hint UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(Board board,
             BoardCell wronglyFlaggedCell)
-        {
+        { // todo: incorporate this function into the generic way.
             foreach (BoardCell revealedNeighbor in board.GetAdjacentCells(wronglyFlaggedCell.PosX,
                 wronglyFlaggedCell.PosY,
                 wronglyFlaggedCell.PosZ).Where(c => c.State == CellState.Revealed))
@@ -220,16 +220,7 @@ namespace Assets.Scripts.Solver
         /// <returns></returns>
         private bool ConsiderTheLackOfRemainingAdjacentBombs(BoardCell cell, bool modifyBoard)
         {
-            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
-            bool computationAdvanced = new LackOfRemainingAdjacentBombsRule().Consider(this.board, cell, report);
-            if (modifyBoard)
-            {
-                report.Where(c => c.TargetState == CellState.Revealed).Distinct()
-                    .ForAll(cc => 
-                        board.Reveal(board[cc.PosX, cc.PosY, cc.PosZ]
-                        ));
-            }
-            return computationAdvanced;
+            return ConsiderTheRule(new LackOfRemainingAdjacentBombsRule(), cell, modifyBoard);
         }
 
         /// <summary>
@@ -239,18 +230,7 @@ namespace Assets.Scripts.Solver
         /// <returns>Whether the noteBoard has been modified during this call</returns>
         private bool ConsiderAllNeighborsAreSafe(BoardCell cell, bool modifyBoard)
         {
-            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
-            IRule rule = new AllNeighborsAreSafeRule();
-            bool computationAdvanced = rule.Consider(this.board, cell, report);
-            // reveal all cells that should be revealed. They are set to targetState revealed in the report.
-            if (modifyBoard)
-            {
-                report.Where(c => c.TargetState == CellState.Revealed).Distinct()
-                    .ForAll(cc => 
-                        board.Reveal(board[cc.PosX, cc.PosY, cc.PosZ]
-                        ));
-            }
-            return computationAdvanced;
+            return ConsiderTheRule(new AllNeighborsAreSafeRule(), cell, modifyBoard);
         }
 
         /// <summary>
@@ -259,44 +239,14 @@ namespace Assets.Scripts.Solver
         /// <returns>Whether the noteBoard has been modified</returns>
         private bool ConsiderAllHiddenNeighborsAreBombs(BoardCell cell, bool modifyBoard)
         {
-            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
-            IRule rule = new AllHiddenNeighborsAreBombsRule();
-            bool computationAdvanced = rule.Consider(this.board, cell, report);
-            
-            // Count number of found Bombs
-            int numNewBombsFound = report.Distinct().Count(rep => rep.TargetState == CellState.Suspect);
-            this.numUnfoundBombs -= numNewBombsFound;
-            
-            // update board if that is wished for
-            if (modifyBoard)
-            {
-                // todo: take rule instance from more global list and set new state to board once (and not just everything for each rule)
-                // i.e. below block shall be removed soon
-                foreach (var c in report)
-                {
-                    this.board[c.PosX, c.PosY, c.PosZ].State = c.TargetState;
-                }
-            }
-
-            return computationAdvanced;
+            // todo: take rule instance from more global list and set new state to board once (and not just everything for each rule)
+            return ConsiderTheRule(new AllHiddenNeighborsAreBombsRule(), cell, modifyBoard);
         }
 
         private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard)
         {
-            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
-            IRule rule = new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegal();
-            bool computationAdvanced = rule.Consider(this.board, cell, report);
-            if (modifyBoard)
-            {
-                report.Where(c => c.TargetState == CellState.Suspect).Distinct()
-                    .ForAll(cc =>
-                    {
-                        numUnfoundBombs--;
-                        board[cc.PosX, cc.PosY, cc.PosZ].State = CellState.Suspect;
-                    });
-            }
-
-            return computationAdvanced;
+            return ConsiderTheRule(new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegal(), cell,
+                modifyBoard);
         }
 
         private bool ConsiderTheRule(IRule rule, BoardCell cell, bool modifyBoard)
@@ -307,10 +257,6 @@ namespace Assets.Scripts.Solver
             if (modifyBoard)
             {
                 // todo: for paralellization, consider carefully how the unfoundBombs are updated! Best is only once, to avoid counting the same finding twice. Probably should compute it from the list instead and remove the out param.
-                // Count number of found Bombs
-                int numNewBombsFound = report.Distinct().Count(rep => rep.TargetState == CellState.Suspect);
-                this.numUnfoundBombs -= numNewBombsFound;
-                
                 // reduce number of Unfound Bombs
                 report.Where(c => c.TargetState == CellState.Suspect).Distinct()
                     .ForAll(cc =>
