@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,15 +19,15 @@ namespace Assets.Scripts.GameLogic
 
             if (cell.IsNude && !cell.IsBomb)
             {
-                board.ForEachNeighbor(cell, (c) =>
+                foreach (var neighbor in cell.Neighbors)
                 {
-                    if (c.State != CellState.Default)
+                    if (neighbor.State != CellState.Default)
                     {
-                        return;
+                        continue;
                     }
 
-                    board.Reveal(c);
-                });
+                    board.Reveal(neighbor);
+                }
             }
         }
 
@@ -35,106 +36,31 @@ namespace Assets.Scripts.GameLogic
             return new Revelation(board, cell, 0.03f);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ForEachNeighbor(this Board board, BoardCell cell, Action<BoardCell> action)
         {
-            var posX = cell.PosX;
-            var posY = cell.PosY;
-            var posZ = cell.PosZ;
-
-            var maxX = board.Width - 1;
-            var maxY = board.Height - 1;
-            var maxZ = board.Depth - 1;
-
-            for (var x = -1; x <= 1; x++)
+            foreach (var neighbor in cell.Neighbors)
             {
-                var indX = x + posX;
-                if (indX < 0 || indX > maxX)
-                {
-                    continue;
-                }
-
-                for (var y = -1; y <= 1; y++)
-                {
-                    var indY = y + posY;
-                    if (indY < 0 || indY > maxY)
-                    {
-                        continue;
-                    }
-
-                    for (var z = -1; z <= 1; z++)
-                    {
-                        var indZ = z + posZ;
-                        if (indZ < 0 || indZ > maxZ)
-                        {
-                            continue;
-                        }
-
-                        if (x == 0 && y == 0 && z == 0)
-                        {
-                            continue;
-                        }
-
-                        action(board[indX, indY, indZ]);
-                    }
-                }
+                action(neighbor);
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<BoardCell> NeighborsOf(this Board board, BoardCell cell)
         {
-            var posX = cell.PosX;
-            var posY = cell.PosY;
-            var posZ = cell.PosZ;
-
-            var maxX = board.Width - 1;
-            var maxY = board.Height - 1;
-            var maxZ = board.Depth - 1;
-
-            for (var x = -1; x <= 1; x++)
-            {
-                var indX = x + posX;
-                if (indX < 0 || indX > maxX)
-                {
-                    continue;
-                }
-
-                for (var y = -1; y <= 1; y++)
-                {
-                    var indY = y + posY;
-                    if (indY < 0 || indY > maxY)
-                    {
-                        continue;
-                    }
-
-                    for (var z = -1; z <= 1; z++)
-                    {
-                        var indZ = z + posZ;
-                        if (indZ < 0 || indZ > maxZ)
-                        {
-                            continue;
-                        }
-
-                        if (x == 0 && y == 0 && z == 0)
-                        {
-                            continue;
-                        }
-
-                        yield return board[indX, indY, indZ];
-                    }
-                }
-            }
+            return cell.Neighbors;
         }
 
         public static int CountNeighbors(this Board board, BoardCell cell, Func<BoardCell, bool> predicate)
         {
             var count = 0;
-            board.ForEachNeighbor(cell, c =>
+            foreach (var neighbor in cell.Neighbors)
             {
-                if (predicate(c))
+                if (predicate(neighbor))
                 {
                     count++;
                 }
-            });
+            }
 
             return count;
         }

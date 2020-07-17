@@ -3,6 +3,7 @@
 
 #region usings
 
+using System.Threading.Tasks;
 using Assets.Scripts;
 using TMPro;
 using Unity_Tools.Core;
@@ -19,11 +20,6 @@ using UnityEngine.UI;
 public class Expander : MonoBehaviour
 {
     /// <summary>
-    ///     The update interval.
-    /// </summary>
-    private const int UpdateInterval = 15;
-
-    /// <summary>
     ///     The content.
     /// </summary>
     public GameObject Content;
@@ -32,6 +28,8 @@ public class Expander : MonoBehaviour
     ///     The content background.
     /// </summary>
     public Sprite ContentBackground;
+
+    public Color ContentBackgroundColor = new Color(1, 1, 1, 0.2f);
 
     /// <summary>
     ///     The expanded.
@@ -48,21 +46,30 @@ public class Expander : MonoBehaviour
     /// </summary>
     public Sprite HeaderBackground;
 
+    public Color HeaderBackgroundColor = new Color(1, 1, 1, 0.3f);
+
     /// <summary>
     ///     The header height.
     /// </summary>
-    public float HeaderHeight = 50f;
+    public float HeaderHeight = 15f;
+
+    public float HeaderFontSize = 14;
+
+    public TextAlignmentOptions HeaderAlignment = TextAlignmentOptions.Center;
 
     /// <summary>
     ///     The header text.
     /// </summary>
     public string HeaderText = "Header";
 
-    /// <summary>
-    ///     The update counter.
-    /// </summary>
-    private int updateCounter;
+    public GameObject Icon;
 
+    public Sprite IconSprite;
+
+    public Color IconColor = new Color(1, 1, 1, 1);
+
+    public float IconSize = 12f;
+    
     /// <summary>
     ///     The on button click.
     /// </summary>
@@ -93,7 +100,7 @@ public class Expander : MonoBehaviour
         var contentPanel = Content.GetOrAddComponent<CanvasRenderer>();
         var contentBackground = Content.GetOrAddComponent<Image>();
         contentBackground.sprite = ContentBackground;
-        contentBackground.color = new Color(1, 1, 1, 0.5f);
+        contentBackground.color = ContentBackgroundColor;
 
         if (Content != null)
         {
@@ -115,8 +122,12 @@ public class Expander : MonoBehaviour
         headerTransform.anchorMin = new Vector2(0, 1);
         headerTransform.anchorMax = new Vector2(1, 1);
 
+        var headerLayout = this.Header.GetOrAddComponent<LayoutElement>();
+        headerLayout.preferredHeight = this.HeaderHeight;
+
         var headerImage = Header.GetOrAddComponent<Image>();
         headerImage.sprite = HeaderBackground;
+        headerImage.color = this.HeaderBackgroundColor;
 
         var headerButton = Header.GetOrAddComponent<Button>();
         headerButton.onClick.RemoveListener(OnButtonClick);
@@ -128,34 +139,71 @@ public class Expander : MonoBehaviour
     /// </summary>
     private void SetupHeaderText()
     {
+        var hOffset = (this.IconSize <= 1e-5) ? 0f : this.HeaderHeight;
+
         var headerTextGo = Header.GetOrCreateChild("Text");
         var headerTextTransform = headerTextGo.GetOrAddComponent<RectTransform>();
         headerTextTransform.localScale = Vector3.one;
         headerTextTransform.pivot = new Vector2(0, 1);
-        headerTextTransform.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 30, -35);
+        headerTextTransform.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, hOffset, -hOffset);
         headerTextTransform.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 0, 0);
         headerTextTransform.anchorMin = new Vector2(0, 0);
         headerTextTransform.anchorMax = new Vector2(1, 1);
 
         var headerText = headerTextGo.GetOrAddComponent<TextMeshProUGUI>();
         headerText.text = HeaderText;
-        headerText.fontSize = 24;
-        headerText.alignment = TextAlignmentOptions.Center;
+        headerText.fontSize = this.HeaderFontSize;
+        headerText.alignment = this.HeaderAlignment;
     }
 
+    private void SetupIcon()
+    {
+        this.Icon = this.Header.GetOrCreateChild("Icon");
+        var iconTransform = this.Icon.GetOrAddComponent<RectTransform>();
+        iconTransform.localScale = Vector3.one;
+        iconTransform.localPosition =
+            new Vector3((this.HeaderHeight - this.IconSize) / 2f, -(this.HeaderHeight / 2f), 0);
+        iconTransform.anchorMin = new Vector2(0, 0.5f);
+        iconTransform.anchorMax = new Vector2(0, 0.5f);
+        iconTransform.anchoredPosition = new Vector2((this.HeaderHeight - this.IconSize) / 2f, 0);
+        iconTransform.sizeDelta = new Vector2(this.IconSize, this.IconSize);
+        iconTransform.pivot = new Vector2(0, 0.5f);
+
+        var iconLayout = this.Icon.GetOrAddComponent<LayoutElement>();
+        iconLayout.preferredHeight = this.IconSize;
+        iconLayout.preferredWidth = this.IconSize;
+
+        var iconImage = this.Icon.GetOrAddComponent<Image>();
+        iconImage.sprite = this.IconSprite;
+        iconImage.color = this.IconColor;
+        iconImage.raycastTarget = false;
+    }
+    
     private void OnEnable()
     {
         UpdateLayout();
     }
 
+    #if UNITY_EDITOR
+    private void Update()
+    {
+        if (Application.isPlaying)
+        {
+            return;
+        }
+
+        this.UpdateLayout();
+    }
+    #endif
+
     /// <summary>
     ///     The update.
     /// </summary>
-    [ContextMenu("Update layout")]
     private void UpdateLayout()
     {
         SetupHeader();
         SetupHeaderText();
         SetupContent();
-    }
+        this.SetupIcon();
+    } 
 }
