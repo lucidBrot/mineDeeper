@@ -81,17 +81,19 @@ namespace Assets.Scripts.Solver
                     // because if all options for one cell are checked at the same cell, caching might work better.
                     if (!computationAdvancedThisTurn)
                     {
-                        computationAdvancedThisTurn = ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
+                        computationAdvancedThisTurn =
+                            SolveConsideringTheRule(new AllHiddenNeighborsAreBombsRule(), cell);
                     }
 
                     if (!computationAdvancedThisTurn)
                     {
-                        computationAdvancedThisTurn = ConsiderAllNeighborsAreSafe(cell, modifyBoard: true);
+                        computationAdvancedThisTurn = SolveConsideringTheRule(new AllNeighborsAreSafeRule(), cell);
                     }
 
                     if (!computationAdvancedThisTurn)
                     {
-                        computationAdvancedThisTurn = ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
+                        computationAdvancedThisTurn =
+                            SolveConsideringTheRule(new LackOfRemainingAdjacentBombsRule(), cell);
                     }
 
                     if (!computationAdvancedThisTurn)
