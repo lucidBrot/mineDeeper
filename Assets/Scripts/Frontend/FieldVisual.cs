@@ -191,12 +191,12 @@ namespace Assets.Scripts.Frontend
 
         private Color GetActiveColor()
         {
-            if (this.boardCell.Highlighted)
+            if (this.boardCell != null && this.boardCell.Highlighted)
             {
                 return Color.yellow;
             }
 
-            if (this.boardCell.Focused)
+            if (this.boardCell != null && this.boardCell.Focused)
             {
                 return ColorProvider.GetFocusColor(this.boardCell.FocusId);
             }
