@@ -134,6 +134,10 @@ namespace Assets.Scripts.Data
             {
                 cell.State = CellState.Default;
             }
+
+            this.flagCount = 0;
+            this.unknownCount = 0;
+            this.HighlightedCell = null;
         }
 
         public void ResetBoard()
@@ -144,6 +148,11 @@ namespace Assets.Scripts.Data
                 cell.AdjacentBombCount = 0;
                 cell.State = CellState.Default;
             }
+
+            this.bombCount = 0;
+            this.flagCount = 0;
+            this.unknownCount = 0;
+            this.HighlightedCell = null;
         }
 
         public IEnumerator<BoardCell> GetEnumerator()
