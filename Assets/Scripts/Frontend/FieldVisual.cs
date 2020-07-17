@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Threading.Tasks;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
 using TMPro;
@@ -16,166 +17,187 @@ namespace Assets.Scripts.Frontend
 
         public GameObject BombVisual;
 
-        public Color Color;
-
         public Material DefaultFieldMaterial;
 
         public Material UnknownFieldMaterial;
 
         public Material SuspectedFieldMaterial;
-
-        public Material DefaultFieldMaterialHighlighted;
+        
+        /*public Material DefaultFieldMaterialHighlighted;
 
         public Material UnknownFieldMaterialHighlighted;
 
-        public Material SuspectedFieldMaterialHighlighted;
+        public Material SuspectedFieldMaterialHighlighted;*/
 
         private BoardCell boardCell;
 
         public BoardCell BoardCell
         {
-            get => boardCell;
+            get => this.boardCell;
             set
             {
-                if (boardCell == value)
+                if (this.boardCell == value)
                 {
                     return;
                 }
 
-                if (boardCell != null)
+                if (this.boardCell != null)
                 {
-                    boardCell.PropertyChanged -= OnBoardCellPropertyChanged;
+                    this.boardCell.PropertyChanged -= this.OnBoardCellPropertyChanged;
                 }
 
-                boardCell = value;
+                this.boardCell = value;
 
-                if (boardCell != null)
+                if (this.boardCell != null)
                 {
-                    boardCell.PropertyChanged += OnBoardCellPropertyChanged;
-                    UpdateVisual();
+                    this.boardCell.PropertyChanged += this.OnBoardCellPropertyChanged;
+                    this.UpdateVisual();
                 }
             }
         }
 
         private float defaultFontSize;
 
+        private Renderer cubeRenderer;
+
+        private MaterialPropertyBlock matPropBlock;
+
         private void OnEnable()
         {
-            if (Text != null)
+            if (this.Text != null)
             {
-                defaultFontSize = Text.fontSize;
+                this.defaultFontSize = this.Text.fontSize;
             }
 
             if (ColorProvider.CanAccessInstance)
             {
-                ColorProvider.Instance.StyleChanged += OnStyleChanged;
+                ColorProvider.Instance.StyleChanged += this.OnStyleChanged;
             }
+
+            this.cubeRenderer = this.CubeVisual != null ? this.CubeVisual.GetComponent<Renderer>() : null;
+            this.matPropBlock = new MaterialPropertyBlock();
         }
 
         private void OnDisable()
         {
             if (ColorProvider.CanAccessInstance)
             {
-                ColorProvider.Instance.StyleChanged -= OnStyleChanged;
+                ColorProvider.Instance.StyleChanged -= this.OnStyleChanged;
             }
         }
 
         private void OnStyleChanged()
         {
-            UpdateColor();
+            this.UpdateColor();
         }
 
         public void UpdateColor()
         {
-            if (CubeVisual != null)
-            {
-                var cubeRenderer = CubeVisual.GetComponent<Renderer>();
-                if (cubeRenderer != null)
-                {
-                    var propBlock = new MaterialPropertyBlock();
-                    cubeRenderer.GetPropertyBlock(propBlock);
-                    var color = ColorProvider.GetCubeColor(this.transform.position);
-                    propBlock.SetColor("_BaseColor", color * this.Color);
-                    cubeRenderer.SetPropertyBlock(propBlock);
-                }
-            }
-        }
-
-        private void OnBoardCellPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            UpdateVisual();
-        }
-
-        private void UpdateVisual()
-        {
-            if (boardCell == null)
+            if (this.cubeRenderer == null)
             {
                 return;
             }
 
-            if (CubeVisual != null) 
+            var color = this.GetActiveColor();
+
+            this.cubeRenderer.GetPropertyBlock(this.matPropBlock);
+            this.matPropBlock.SetColor("_Color", color);
+            this.cubeRenderer.SetPropertyBlock(this.matPropBlock);
+
+        }
+
+        private void OnBoardCellPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            this.UpdateVisual();
+        }
+
+        private void UpdateVisual()
+        {
+            if (this.boardCell == null)
             {
-                if (boardCell.State == CellState.Revealed)
+                return;
+            }
+
+            if (this.CubeVisual != null) 
+            {
+                if (this.boardCell.State == CellState.Revealed)
                 {
-                    CubeVisual.SetActive(false);
+                    this.CubeVisual.SetActive(false);
                 }
                 else
                 {
-                    CubeVisual.SetActive(true);
-                    var cubeRenderer = CubeVisual.GetComponent<Renderer>();
-                    
-                    switch (boardCell.State)
+                    this.CubeVisual.SetActive(true);
+
+                    if (this.cubeRenderer != null)
                     {
-                        case CellState.Default:
-                            cubeRenderer.sharedMaterial = boardCell.Highlighted ? DefaultFieldMaterialHighlighted : DefaultFieldMaterial;
-                            break;
-                        case CellState.Suspect:
-                            cubeRenderer.sharedMaterial = boardCell.Highlighted ? SuspectedFieldMaterialHighlighted : SuspectedFieldMaterial;
-                            break;
-                        case CellState.Unknown:
-                            cubeRenderer.sharedMaterial = boardCell.Highlighted? UnknownFieldMaterialHighlighted : UnknownFieldMaterial;
-                            break;
+                        switch (this.boardCell.State)
+                        {
+                            case CellState.Default:
+                                this.cubeRenderer.sharedMaterial = this.DefaultFieldMaterial;
+                                break;
+                            case CellState.Suspect:
+                                this.cubeRenderer.sharedMaterial = this.SuspectedFieldMaterial;
+                                break;
+                            case CellState.Unknown:
+                                this.cubeRenderer.sharedMaterial = this.UnknownFieldMaterial;
+                                break;
+                        }
                     }
 
+                    this.UpdateColor();
                 }
             }
             
-            if (BombVisual != null)
+            if (this.BombVisual != null)
             {
-                BombVisual.SetActive(boardCell.IsBomb && boardCell.State == CellState.Revealed);
+                this.BombVisual.SetActive(this.boardCell.IsBomb && this.boardCell.State == CellState.Revealed);
             }
 
-            if (OutlineVisual != null)
+            if (this.OutlineVisual != null)
             {
-                OutlineVisual.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude && !boardCell.IsBomb);
+                this.OutlineVisual.SetActive(this.boardCell.State == CellState.Revealed && !this.boardCell.IsNude && !this.boardCell.IsBomb);
             }
 
-            if (Text != null)
+            if (this.Text != null)
             {
-                Text.gameObject.SetActive(boardCell.State == CellState.Revealed && !boardCell.IsNude && !boardCell.IsBomb);
+                this.Text.gameObject.SetActive(this.boardCell.State == CellState.Revealed && !this.boardCell.IsNude && !this.boardCell.IsBomb);
 
-                var text = boardCell.IsNude ? string.Empty : boardCell.AdjacentBombCount.ToString();
+                var text = this.boardCell.IsNude ? string.Empty : this.boardCell.AdjacentBombCount.ToString();
 
-                Text.text = text;
+                this.Text.text = text;
 
-                if (!boardCell.IsNude)
+                if (!this.boardCell.IsNude)
                 {
                     var colors = ColorProvider.Instance.NumberColors;
-                    var index = boardCell.AdjacentBombCount - 1;
+                    var index = this.boardCell.AdjacentBombCount - 1;
                     this.Text.color = index < colors.Length ? colors[index] : colors[colors.Length - 1];
                 }
 
-                if (boardCell.Highlighted)
+                if (this.boardCell.Highlighted)
                 {
-                    Text.color = Color.yellow;
-                    Text.fontSize = 1.5f * defaultFontSize;
+                    this.Text.color = Color.yellow;
+                    this.Text.fontSize = 1.5f * this.defaultFontSize;
                 }
                 else
                 {
-                    Text.fontSize = defaultFontSize;
+                    this.Text.fontSize = this.defaultFontSize;
                 }
             }
         }
 
+        private Color GetActiveColor()
+        {
+            if (this.boardCell.Highlighted)
+            {
+                return Color.yellow;
+            }
+
+            if (this.boardCell.Focused)
+            {
+                return ColorProvider.GetFocusColor(this.boardCell.FocusId);
+            }
+
+            return ColorProvider.GetCubeColor(this.transform.position);
+        }
     }
 }

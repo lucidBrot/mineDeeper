@@ -13,6 +13,9 @@ namespace Assets.Scripts.Data
     {
         private CellState state;
         private bool highlighted;
+        private bool focused;
+        private int focusId;
+        private BoardCell[] neighbors;
 
         /// <summary>
         /// My summary.
@@ -43,6 +46,36 @@ namespace Assets.Scripts.Data
             }
         }
 
+        public bool Focused
+        {
+            get => this.focused;
+            set
+            {
+                if (value == this.focused)
+                {
+                    return;
+                }
+
+                this.focused = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public int FocusId
+        {
+            get => this.focusId;
+            set
+            {
+                if (value.Equals(this.focusId))
+                {
+                    return;
+                }
+
+                this.focusId = value;
+                this.OnPropertyChanged();
+            }
+        }
+
         public CellState State
         {
             get => state;
@@ -54,6 +87,12 @@ namespace Assets.Scripts.Data
             }
         }
 
+        public BoardCell[] Neighbors
+        {
+            get => this.neighbors;
+            set => this.neighbors = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
         public BoardCell(int posX, int posY, int posZ)
         {
             this.PosX = posX;
@@ -63,6 +102,7 @@ namespace Assets.Scripts.Data
             AdjacentBombCount = 0;
             IsBomb = false;
             State = CellState.Default;
+            this.neighbors = Array.Empty<BoardCell>();
         }
 
         public void ToggleMarking()
