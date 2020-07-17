@@ -11,7 +11,8 @@ namespace Assets.Scripts.Solver.Rules
         // TODO: make the board immutable in every case and return modifications instead.
 
         /// <summary>
-        /// Consider this Rule
+        /// Consider this Rule.
+        /// Returns True if considering this rule advances the board in any way.
         /// </summary>
         /// <param name="board">A board that shall not be modified</param>
         /// <param name="cell">The target cell to consider.</param>
@@ -21,7 +22,7 @@ namespace Assets.Scripts.Solver.Rules
         /// This Collection must not be null!</param>
         /// <param name="numBombsFound">The number of found bombs during this Rule Consideration. Useful for during this refactoring transition time. Probably no more later...</param>
         /// <returns>
-        /// Returns True if considering this rule advances the board in any way.
+        
         /// </returns>
         bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection);
     }

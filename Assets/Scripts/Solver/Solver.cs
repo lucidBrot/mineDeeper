@@ -136,6 +136,16 @@ namespace Assets.Scripts.Solver
             }
 
             // heuristics from solver as hints
+            // This list contains all (nicely behaving, i.e. not the above) IHintRules so that they will be checked
+            // in the order they are listed here.
+            List<IHintRule> hintRules = new List<IHintRule>
+                {
+                    new AllHiddenNeighborsAreBombsRule(),
+                    new AllNeighborsAreSafeRule(),
+                    new LackOfRemainingAdjacentBombsRule(),
+                    new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(),
+                };
+            // TODO: Need to modify this list whenever the solver.Compute function is modified. Bad.
             foreach (BoardCell cell in solver.board.Cells)
             {
                 // if it is a revealed bomb, it's a weird case we didn't think of before. It's safer to just ignore that for now
@@ -144,34 +154,14 @@ namespace Assets.Scripts.Solver
                     continue;
                 }
                 Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
-
-                IHintRule hintRule; // todo: use a loop over the list of HintRules here
-                hintRule = new AllHiddenNeighborsAreBombsRule();
-                if (solver.ConsiderTheRule(hintRule, cell, false))
-                {
-                    return hintRule.GenerateHint(cell);
-                }
                 
-                hintRule = new AllNeighborsAreSafeRule();
-                if (solver.ConsiderTheRule(hintRule, cell, false))
-                {
-                    return hintRule.GenerateHint(cell);
+                // generate a Hint if possible
+                foreach (var hintRule in hintRules) {
+                    if (solver.ConsiderTheRule(hintRule, cell, false))
+                    {
+                        return hintRule.GenerateHint(cell);
+                    }
                 }
-                
-                hintRule = new LackOfRemainingAdjacentBombsRule();
-                if (solver.ConsiderTheRule(hintRule, cell, false))
-                {
-                    return hintRule.GenerateHint(cell);
-                }
-
-                // this is a more costly operation and it is harder for the user to see
-                hintRule = new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule();
-                if (solver.ConsiderTheRule(hintRule, cell, false)) // todo: implement and use this pattern for all hints
-                {
-                    return hintRule.GenerateHint(cell);
-                }
-
-                // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
             }
 
             if (solver.numUnfoundBombs == 0)
@@ -192,7 +182,7 @@ namespace Assets.Scripts.Solver
         /// <returns>null if no hint found, otherwise a hint</returns>
         private static Hint UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(Board board,
             BoardCell wronglyFlaggedCell)
-        { // todo: incorporate this function into the generic way.
+        {   // this function is not transformed into an IHintRule because the hint requires access to `revealedNeighbor` 
             foreach (BoardCell revealedNeighbor in board.GetAdjacentCells(wronglyFlaggedCell.PosX,
                 wronglyFlaggedCell.PosY,
                 wronglyFlaggedCell.PosZ).Where(c => c.State == CellState.Revealed))
@@ -208,37 +198,6 @@ namespace Assets.Scripts.Solver
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// If there are already N suspects among the neighbors of the cell,
-        /// then the remaining neighbors are all clean and can be revealed.
-        /// </summary>
-        /// <param name="cell"></param>
-        /// <returns></returns>
-        private bool ConsiderTheLackOfRemainingAdjacentBombs(BoardCell cell, bool modifyBoard)
-        {
-            return ConsiderTheRule(new LackOfRemainingAdjacentBombsRule(), cell, modifyBoard);
-        }
-
-        /// <summary>
-        /// if the number of adjacent uncertainties equals 0, every uncertainty is safe
-        /// </summary>
-        /// <param name="cell"></param>
-        /// <returns>Whether the noteBoard has been modified during this call</returns>
-        private bool ConsiderAllNeighborsAreSafe(BoardCell cell, bool modifyBoard)
-        {
-            return ConsiderTheRule(new AllNeighborsAreSafeRule(), cell, modifyBoard);
-        }
-
-        /// <summary>
-        /// if the number of adjacent uncertainties equals the number on the cell, every uncertainty is a bomb
-        /// </summary>
-        /// <returns>Whether the noteBoard has been modified</returns>
-        private bool ConsiderAllHiddenNeighborsAreBombs(BoardCell cell, bool modifyBoard)
-        {
-            // todo: take rule instance from more global list and set new state to board once (and not just everything for each rule)
-            return ConsiderTheRule(new AllHiddenNeighborsAreBombsRule(), cell, modifyBoard);
         }
 
         /// <summary>
