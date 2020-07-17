@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Solver.Rules
 {
-    public class TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegal : IRule
+    public class TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule : IRule, IHintRule
     {
         public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
         {
@@ -119,6 +119,14 @@ namespace Assets.Scripts.Solver.Rules
             bombsFound = possibleBombPairs[0];
             
             return true;
+        }
+
+        public Hint GenerateHint(BoardCell consideredCell)
+        {
+            return new Hint(consideredCell,
+                Data.Hint.HintTypes.ThereIsOnlyOneLegalOptionToArrangeTheTwoMissingBombs,
+                "There is only one way the two missing bombs around " + consideredCell.ToString() + " can be placed.",
+                consideredCell);
         }
     }
 }

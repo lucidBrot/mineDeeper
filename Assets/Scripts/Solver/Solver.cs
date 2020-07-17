@@ -97,8 +97,8 @@ namespace Assets.Scripts.Solver
                     if (!computationAdvancedThisTurn)
                     {
                         // this is a more costly operation and hence should only be tried if others don't help
-                        computationAdvancedThisTurn =
-                            ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard: true);
+                        computationAdvancedThisTurn = SolveConsideringTheRule(
+                            new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(), cell);
                     }
 
                     if (computationAdvancedThisTurn)
@@ -164,13 +164,10 @@ namespace Assets.Scripts.Solver
                 }
 
                 // this is a more costly operation and it is harder for the user to see
-                Tuple<BoardCell, BoardCell> bombPair;
-                if (solver.ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard:false))
+                IHintRule hintRule = new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule();
+                if (solver.ConsiderTheRule(hintRule, cell, false)) // todo: implement and use this pattern for all hints
                 {
-                    return new Hint(cell,
-                        Data.Hint.HintTypes.ThereIsOnlyOneLegalOptionToArrangeTheTwoMissingBombs,
-                        "There is only one way the two missing bombs around " + cell.ToString() + " can be placed.",
-                        cell);
+                    return hintRule.GenerateHint(cell);
                 }
 
                 // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
@@ -243,10 +240,15 @@ namespace Assets.Scripts.Solver
             return ConsiderTheRule(new AllHiddenNeighborsAreBombsRule(), cell, modifyBoard);
         }
 
-        private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard)
+        /// <summary>
+        /// Modifies the solver's board if the rule is useful and returns true iff it the rule is useful i.e. helped progress.
+        /// </summary>
+        /// <param name="rule"></param>
+        /// <param name="cell"></param>
+        /// <returns></returns>
+        private bool SolveConsideringTheRule(IRule rule, BoardCell cell)
         {
-            return ConsiderTheRule(new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegal(), cell,
-                modifyBoard);
+            return ConsiderTheRule(rule, cell, true);
         }
 
         private bool ConsiderTheRule(IRule rule, BoardCell cell, bool modifyBoard)
@@ -257,6 +259,7 @@ namespace Assets.Scripts.Solver
             if (modifyBoard)
             {
                 // todo: for paralellization, consider carefully how the unfoundBombs are updated! Best is only once, to avoid counting the same finding twice. Probably should compute it from the list instead and remove the out param.
+                // todo: make this method static in the end.
                 // reduce number of Unfound Bombs
                 report.Where(c => c.TargetState == CellState.Suspect).Distinct()
                     .ForAll(cc =>
@@ -275,6 +278,8 @@ namespace Assets.Scripts.Solver
             // todo: check if some cell is in both sets (or is already set to Suspect but should be revealed according to some rule now) and generate according hint to the user.
             return computationAdvanced;
         }
+        
+        
         
         /// <summary>
         /// Abort the Solver as soon as befitting it, discarding any useful result.
