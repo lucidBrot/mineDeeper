@@ -173,26 +173,25 @@ public class MouseController : MonoBehaviour
                         {
                             cell.Focused = true;
                             cell.FocusId = i;
+                            // set color of surrounding numbers
+                            var ii = i;
+                            cell.Neighbors.Where(c => c.State == CellState.Revealed).ForAll(number =>
+                            {
+                                number.Focused = true;
+                                number.FocusId = ii;
+                            });
                         }
                         else
                         {
                             cell.Focused = false;
-                        }
-                        
-                        // set color of surrounding numbers
-                        var ii = i;
-                        cell.Neighbors.Where(c => c.State == CellState.Revealed).ForAll(number =>
-                        {
-                            if (!number.Focused || number.FocusId != ii)
-                            {
-                                number.Focused = true;
-                                number.FocusId = ii;
-                            }
-                            else
+                            // set color of surrounding numbers off
+                            var ii = i;
+                            cell.Neighbors.Where(c => c.State == CellState.Revealed).ForAll(number =>
                             {
                                 number.Focused = false;
-                            }
-                        });
+                            });
+                        }
+                        
                     }
                 }
             }
