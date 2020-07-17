@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Assets.Scripts.Data;
+using Assets.Scripts.Solver.Rules;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -221,5 +222,31 @@ namespace Assets.Scripts.Tests
             Assert.AreEqual(false, solvable, "Gandalf 3D the white shall not pass.");
             Assert.AreEqual(true, solver.HasAborted, "Gandalf 3D the grey shall not pass.");
         }
+
+        [Test, Timeout(2000)]
+        public void AllSolverRulesCanGiveHints()
+        {
+            Board testBoard = new Board(3, 3, 3);
+            testBoard.SetBombState(0, 0, 1, true);
+            testBoard.SetBombState(0, 2, 1, true);
+            testBoard[0, 1, 1].State = CellState.Revealed;
+            testBoard[1, 1, 1].State = CellState.Revealed;
+            Solver.Solver solver = new Solver.Solver(testBoard);
+
+            (var a, var b) = solver.GetRuleListsForTesting();
+            List<Type> hintRuleTypes = new List<Type>();
+            foreach (IHintRule hintRule in b)
+            {
+                var tb = hintRule.GetType();
+                hintRuleTypes.Add(tb);
+            }
+            foreach (IRule rule in a)
+            {
+                var ta = rule.GetType();
+                bool okay = hintRuleTypes.Contains(ta);
+                Assert.True(okay, "Every Solver Rule should be represented in the hint rules. If this is not the case, think again about whether this should be required. Look at the lists in Solver.cs");
+            }
+        }
+
     }
 }

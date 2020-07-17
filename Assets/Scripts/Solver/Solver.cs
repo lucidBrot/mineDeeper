@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
+using Assets.Scripts.Solver.Rules;
 using JetBrains.Annotations;
+using Unity_Tools.Core;
 using UnityEngine;
 
 namespace Assets.Scripts.Solver
@@ -26,6 +29,26 @@ namespace Assets.Scripts.Solver
         /// because we did not find the board to be solvable
         /// </summary>
         private const bool ABORTED = false;
+        
+        // This list contains all (nicely behaving, i.e. not the above) IHintRules so that they will be checked
+        // in the order they are listed here.
+        private readonly List<IHintRule> hintRules = new List<IHintRule>
+        {
+            new AllHiddenNeighborsAreBombsRule(),
+            new AllNeighborsAreSafeRule(),
+            new LackOfRemainingAdjacentBombsRule(),
+            new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(),
+        };
+        // TODO: Need to modify this list whenever the solver.Compute function is modified. Bad.
+        
+        // List of Rules to consider in order (for solving)
+        private readonly List<IRule> rules = new List<IRule>()
+        {
+            new AllHiddenNeighborsAreBombsRule(),
+            new AllNeighborsAreSafeRule(),
+            new LackOfRemainingAdjacentBombsRule(),
+            new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(),
+        };
 
         public Solver(Board board)
         {
@@ -73,30 +96,17 @@ namespace Assets.Scripts.Solver
                     }
 
                     Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
-                    // using `if (!computationAdvancedThisTurn)` to short-circuit.
-                    // On second thought, It could be better or worse than using |= which does not short-circuit -
-                    // because if all options for one cell are checked at the same cell, caching might work better.
-                    if (!computationAdvancedThisTurn)
-                    {
-                        computationAdvancedThisTurn = ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: true);
-                    }
 
-                    if (!computationAdvancedThisTurn)
+                    foreach (var rule in rules)
                     {
-                        computationAdvancedThisTurn = ConsiderAllNeighborsAreSafe(cell, modifyBoard: true);
-                    }
-
-                    if (!computationAdvancedThisTurn)
-                    {
-                        computationAdvancedThisTurn = ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: true);
-                    }
-
-                    if (!computationAdvancedThisTurn)
-                    {
-                        // this is a more costly operation and hence should only be tried if others don't help
-                        computationAdvancedThisTurn =
-                            ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard: true,
-                                out _);
+                        // using `if (!computationAdvancedThisTurn)` to short-circuit.
+                        // On second thought, It could be better or worse than using |= which does not short-circuit -
+                        // because if all options for one cell are checked at the same cell, caching might work better.
+                        if (!computationAdvancedThisTurn)
+                        {
+                            computationAdvancedThisTurn =
+                                SolveConsideringTheRule(rule, cell);
+                        }
                     }
 
                     if (computationAdvancedThisTurn)
@@ -140,49 +150,14 @@ namespace Assets.Scripts.Solver
                     continue;
                 }
                 Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
-
-                if (solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: false))
-                {
-                    return new Hint(
-                        cell, Data.Hint.HintTypes.AllHiddenNeighborsAreBombs,
-                        "Consider that all hidden neighbors of " + cell.ToString() + " are bombs.", cell);
-                }
-
-                if (solver.ConsiderAllNeighborsAreSafe(cell, modifyBoard: false))
-                {
-                    return new Hint(cell, Data.Hint.HintTypes.AllNeighborsAreSafe,
-                        "Consider that all neighbors of " + cell.ToString() + " are certainly safe.", cell);
-                }
-
-                if (solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false))
-                {
-                    return new Hint(cell, Data.Hint.HintTypes.MaxAdjacentBombsReached,
-                        "Consider that there can not be any more bombs around " + cell.ToString() +
-                        " than you already found.", cell);
-                }
-
-                // this is a more costly operation and it is harder for the user to see
-                Tuple<BoardCell, BoardCell> bombPair;
-                if (solver.ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(cell, modifyBoard:false, out bombPair))
-                {
-                    List<BoardCell> l;
-                    if (bombPair == null)
+                
+                // generate a Hint if possible
+                foreach (var hintRule in solver.hintRules) {
+                    if (solver.ConsiderTheRule(hintRule, cell, false))
                     {
-                        Debug.Log("bombPair for hint is null, but a solution was found. This should never happen. Highlighting the concerned Cell...");
-                        l = new List<BoardCell>() {cell};
+                        return hintRule.GenerateHint(cell);
                     }
-                    else
-                    {
-                        l = new List<BoardCell>() {bombPair.Item1, bombPair.Item2};
-                    }
-
-                    return new Hint(cell,
-                        Data.Hint.HintTypes.ThereIsOnlyOneLegalOptionToArrangeTheTwoMissingBombs,
-                        "There is only one way the two missing bombs around " + cell.ToString() + " can be placed.",
-                        cell);
                 }
-
-                // TODO: Need to modify this code whenever the solver.Compute function is modified. Bad.
             }
 
             if (solver.numUnfoundBombs == 0)
@@ -196,13 +171,14 @@ namespace Assets.Scripts.Solver
 
         /// <summary>
         /// Hints about absolutely obviously wrong suspects
+        /// Hence this is not useful for the Solver but is useful for hints.
         /// </summary>
         /// <param name="board"></param>
         /// <param name="wronglyFlaggedCell"></param>
         /// <returns>null if no hint found, otherwise a hint</returns>
         private static Hint UserCouldSeeThatThisFlagIsWrongUnlessThisFunctionReturnsNull(Board board,
             BoardCell wronglyFlaggedCell)
-        {
+        {   // this function is not transformed into an IHintRule because the hint requires access to `revealedNeighbor` 
             foreach (BoardCell revealedNeighbor in board.GetAdjacentCells(wronglyFlaggedCell.PosX,
                 wronglyFlaggedCell.PosY,
                 wronglyFlaggedCell.PosZ).Where(c => c.State == CellState.Revealed))
@@ -221,225 +197,57 @@ namespace Assets.Scripts.Solver
         }
 
         /// <summary>
-        /// If there are already N suspects among the neighbors of the cell,
-        /// then the remaining neighbors are all clean and can be revealed.
+        /// Modifies the solver's board if the rule is useful and returns true iff it the rule is useful i.e. helped progress.
         /// </summary>
+        /// <param name="rule"></param>
         /// <param name="cell"></param>
         /// <returns></returns>
-        private bool ConsiderTheLackOfRemainingAdjacentBombs(BoardCell cell, bool modifyBoard)
+        private bool SolveConsideringTheRule(IRule rule, BoardCell cell)
         {
-            // only perform this check for cells that are not bombs (i.E. cell.State!=Suspect).
-            // Because bombs carry no information about their neighbours
-            // only perform this check for cells that we know the adjacent bomb count of (i.e. cell.State==Revealed)
-            // only perform this check if there are unrevealed unsuspect neighbors => skip if there are only revealed neighbors
-            if (cell.State != CellState.Revealed ||
-                board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ)
-                    .All(c => c.State == CellState.Revealed || c.State == CellState.Suspect)
-            )
-            {
-                return false;
-            }
-
-            int numSurroundingSuspects = board.CountNeighbors(cell, n => n.State == CellState.Suspect);
-            if (numSurroundingSuspects == cell.AdjacentBombCount)
-            {
-                board.ForEachNeighbor(cell, neighbor =>
-                {
-                    if (neighbor.State != CellState.Suspect && modifyBoard)
-                    {
-                        board.Reveal(neighbor);
-                    }
-                });
-                return true;
-            }
-
-            return false;
+            return ConsiderTheRule(rule, cell, true);
         }
 
-        /// <summary>
-        /// if the number of adjacent uncertainties equals 0, every uncertainty is safe
-        /// </summary>
-        /// <param name="cell"></param>
-        /// <returns>Whether the noteBoard has been modified during this call</returns>
-        private bool ConsiderAllNeighborsAreSafe(BoardCell cell, bool modifyBoard)
+        private bool ConsiderTheRule(IRule rule, BoardCell cell, bool modifyBoard)
         {
-            if (cell.State != CellState.Revealed)
-            {
-                return false;
-            }
-
-            if (cell.IsNude)
-            {
-                var hadUnrevealed = false;
-                board.ForEachNeighbor(cell, c => hadUnrevealed |= c.State != CellState.Revealed);
-                if (hadUnrevealed && modifyBoard)
-                {
-                    board.Reveal(cell);
-                }
-
-                return hadUnrevealed;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// if the number of adjacent uncertainties equals the number on the cell, every uncertainty is a bomb
-        /// </summary>
-        /// <returns>Whether the noteBoard has been modified</returns>
-        private bool ConsiderAllHiddenNeighborsAreBombs(BoardCell cell, bool modifyBoard)
-        {
-            // skip cells we know nothing of and nude cells
-            if (cell.State != CellState.Revealed || cell.IsNude)
-            {
-                return false;
-            }
-
-            var unrevealedNeighborAmount = board.CountNeighbors(cell, c => c.State != CellState.Revealed);
-            var revealedNeighborBombsAmount =
-                board.CountNeighbors(cell, c => c.State == CellState.Revealed && c.IsBomb);
-
-            if (cell.AdjacentBombCount - revealedNeighborBombsAmount == unrevealedNeighborAmount)
-            {
-                var hasChanges = false;
-
-                board.ForEachNeighbor(cell, c =>
-                {
-                    if (c.State != CellState.Revealed && c.State != CellState.Suspect)
-                    {
-                        if (modifyBoard)
-                        {
-                            c.State = CellState.Suspect;
-                        }
-
-                        hasChanges = true;
-                        numUnfoundBombs--;
-                    }
-                });
-
-                return hasChanges;
-            }
-
-            return false;
-        }
-
-        private bool ConsiderAllOptionsForTwoBombsAndFindThatOnlyOneOptionIsLegal(BoardCell cell, bool modifyBoard, [CanBeNull] out Tuple<BoardCell, BoardCell> bombsFound)
-        {
-            // by default, we found nothing
-            bombsFound = null;
-
-            // skip cells we know nothing of and nude cells
-            if (cell.State != CellState.Revealed || cell.IsNude)
-            {
-                return false;
-            }
-
-            // consider only cells with exactly 2 missing bombs
-            if (cell.AdjacentBombCount - 
-                board.NeighborsOf(cell).Count(
-                    c => c.State == CellState.Suspect || (c.IsBomb && c.State == CellState.Revealed)) != 2
-                )
-            {
-                return false;
-            }
-
-            // we will want to store all possibilities
-            List<Tuple<BoardCell, BoardCell>> possibleBombPairs = new List<Tuple<BoardCell, BoardCell>>(2);
-
-            // get all unrevealed neighbors - those could be bombs
-            var unrevealedNeighbors = board.NeighborsOf(cell).Where(c => c.State != CellState.Revealed)
-                .OrderBy(x => x.PosX).ThenBy(x => x.PosY).ThenBy(x => x.PosZ).ToList();
-            foreach (BoardCell possibleBomb1 in unrevealedNeighbors)
-            {
-                // would that bomb even be valid?
-                if (board.NeighborsOf(possibleBomb1).Where(cll => cll.State == CellState.Revealed).Any(
-                    // has already enough bombs
-                    c => board.NeighborsOf(c).Count(n => (n.IsBomb && n.State == CellState.Revealed) || n.State == CellState.Suspect) >= c.AdjacentBombCount
-                    ))
-                {
-                    continue;
-                }
-
-                // try all other bombs
-                var unrevealedNeighborsReversed = Enumerable.Reverse(unrevealedNeighbors);
-                foreach (BoardCell possibleBomb2 in unrevealedNeighborsReversed)
-                {
-                    // we only need to consider each couple (a, b) once.
-                    // Since the inner loop is reversed, we can stop the inner loop once a == b
-                    if (possibleBomb1 == possibleBomb2)
-                    {
-                        break;
-                    }
-
-                    // would that bomb2 even be valid?
-                    if (board.NeighborsOf(possibleBomb2).Where(cll => cll.State == CellState.Revealed).Any(
-                        // has already enough bombs
-                        c => board.NeighborsOf(c).Count(n => (n.State == CellState.Revealed && n.IsBomb) || n.State == CellState.Suspect) >=
-                             c.AdjacentBombCount
-                    ))
-                    {
-                        continue;
-                    }
-
-                    // Each possibleBomb on its own would be valid. Would the combination still be?
-                    // Check all cells that are neighbors of of both bombs for whether they disagree
-                    bool atLeastOneJudgeDisagrees = false;
-                    var neighborsOfBothPossibleBombs = board.NeighborsOf(possibleBomb1)
-                        .Intersect(board.NeighborsOf(possibleBomb2));
-                    foreach (BoardCell judge in neighborsOfBothPossibleBombs.Where(c => c.State == CellState.Revealed && !c.IsBomb))
-                    {
-                        if (board.NeighborsOf(judge)
-                                     .Count(n => (n.State == CellState.Revealed 
-                                            && n.IsBomb ) || n.State == CellState.Suspect) 
-                                            + 2 > judge.AdjacentBombCount
-                        )
-                        {
-                            // at least one judge disagrees. Do not store this option and continue checking other options
-                            atLeastOneJudgeDisagrees = true;
-                            break;
-                        }
-                    }
-
-                    if (!atLeastOneJudgeDisagrees)
-                    {
-                        // everything fine, store this as a possible option
-                        possibleBombPairs.Add(new Tuple<BoardCell, BoardCell>(possibleBomb1, possibleBomb2));
-                        if (possibleBombPairs.Count > 1)
-                        {
-                            // too many options - the solution is not unique
-                            return false;
-                        }
-                    }
-
-                }
-
-            }
-
-            if(possibleBombPairs.Count == 0)
-            {
-                // nothing found
-                return false;
-            }
-
-            Debug.Assert(possibleBombPairs.Count == 1);
+            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
+            bool computationAdvanced = rule.Consider(this.board, cell, report);
 
             if (modifyBoard)
             {
-                possibleBombPairs[0].Item1.State = CellState.Suspect;
-                possibleBombPairs[0].Item2.State = CellState.Suspect;
-                numUnfoundBombs -= 2;
+                // todo: for paralellization, consider carefully how the unfoundBombs are updated! Best is only once, to avoid counting the same finding twice. Probably should compute it from the list instead and remove the out param.
+                // todo: make this method static in the end.
+                // reduce number of Unfound Bombs
+                report.Where(c => c.TargetState == CellState.Suspect).Distinct()
+                    .ForAll(cc =>
+                    {
+                        numUnfoundBombs--;
+                        board[cc.PosX, cc.PosY, cc.PosZ].State = CellState.Suspect;
+                    });
+                
+                // reveal safe cells
+                report.Where(c => c.TargetState == CellState.Revealed).Distinct()
+                    .ForAll(cc => 
+                        board.Reveal(board[cc.PosX, cc.PosY, cc.PosZ]
+                        ));
             }
 
-            bombsFound = possibleBombPairs[0];
-            return true;
-
+            // todo: check if some cell is in both sets (or is already set to Suspect but should be revealed according to some rule now) and generate according hint to the user.
+            return computationAdvanced;
         }
+        
+        
+        
         /// <summary>
         /// Abort the Solver as soon as befitting it, discarding any useful result.
         /// </summary>
         public void Abort()
         {
             this.ShouldAbort = true;
+        }
+
+        public Tuple<List<IRule>, List<IHintRule>> GetRuleListsForTesting()
+        {
+            return new Tuple<List<IRule>, List<IHintRule>>(this.rules, this.hintRules);
         }
 
     }
