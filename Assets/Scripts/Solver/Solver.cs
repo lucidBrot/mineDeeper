@@ -145,28 +145,27 @@ namespace Assets.Scripts.Solver
                 }
                 Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
 
-                if (solver.ConsiderAllHiddenNeighborsAreBombs(cell, modifyBoard: false))
+                IHintRule hintRule; // todo: use a loop over the list of HintRules here
+                hintRule = new AllHiddenNeighborsAreBombsRule();
+                if (solver.ConsiderTheRule(hintRule, cell, false))
                 {
-                    return new Hint(
-                        cell, Data.Hint.HintTypes.AllHiddenNeighborsAreBombs,
-                        "Consider that all hidden neighbors of " + cell.ToString() + " are bombs.", cell);
+                    return hintRule.GenerateHint(cell);
                 }
-
-                if (solver.ConsiderAllNeighborsAreSafe(cell, modifyBoard: false))
+                
+                hintRule = new AllNeighborsAreSafeRule();
+                if (solver.ConsiderTheRule(hintRule, cell, false))
                 {
-                    return new Hint(cell, Data.Hint.HintTypes.AllNeighborsAreSafe,
-                        "Consider that all neighbors of " + cell.ToString() + " are certainly safe.", cell);
+                    return hintRule.GenerateHint(cell);
                 }
-
-                if (solver.ConsiderTheLackOfRemainingAdjacentBombs(cell, modifyBoard: false))
+                
+                hintRule = new LackOfRemainingAdjacentBombsRule();
+                if (solver.ConsiderTheRule(hintRule, cell, false))
                 {
-                    return new Hint(cell, Data.Hint.HintTypes.MaxAdjacentBombsReached,
-                        "Consider that there can not be any more bombs around " + cell.ToString() +
-                        " than you already found.", cell);
+                    return hintRule.GenerateHint(cell);
                 }
 
                 // this is a more costly operation and it is harder for the user to see
-                IHintRule hintRule = new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule();
+                hintRule = new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule();
                 if (solver.ConsiderTheRule(hintRule, cell, false)) // todo: implement and use this pattern for all hints
                 {
                     return hintRule.GenerateHint(cell);

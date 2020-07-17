@@ -7,7 +7,7 @@ namespace Assets.Scripts.Solver.Rules
     /// <summary>
     /// if the number of adjacent uncertainties equals 0, every uncertainty is safe
     /// </summary>
-    public class AllNeighborsAreSafeRule : IRule
+    public class AllNeighborsAreSafeRule : IRule, IHintRule
     {
         public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
         {
@@ -29,6 +29,13 @@ namespace Assets.Scripts.Solver.Rules
             }
 
             return false;
+        }
+
+        public Hint GenerateHint(BoardCell consideredCell)
+        {
+            var cell = consideredCell;
+            return new Hint(cell, Data.Hint.HintTypes.AllNeighborsAreSafe,
+                "Consider that all neighbors of " + cell.ToString() + " are certainly safe.", cell);
         }
     }
 }

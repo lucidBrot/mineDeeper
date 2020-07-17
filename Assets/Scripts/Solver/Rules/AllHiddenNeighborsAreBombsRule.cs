@@ -7,7 +7,7 @@ namespace Assets.Scripts.Solver.Rules
     /// <summary>
     /// if the number of adjacent uncertainties equals the number on the cell, every uncertainty is a bomb
     /// </summary>
-    public class AllHiddenNeighborsAreBombsRule : IRule
+    public class AllHiddenNeighborsAreBombsRule : IRule, IHintRule
     {
         public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
         {
@@ -37,6 +37,14 @@ namespace Assets.Scripts.Solver.Rules
             }
 
             return false;
+        }
+
+        public Hint GenerateHint(BoardCell consideredCell)
+        {
+            var cell = consideredCell;
+            return new Hint(
+                cell, Data.Hint.HintTypes.AllHiddenNeighborsAreBombs,
+                "Consider that all hidden neighbors of " + cell.ToString() + " are bombs.", cell);
         }
     }
 }

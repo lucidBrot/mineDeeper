@@ -9,7 +9,7 @@ namespace Assets.Scripts.Solver.Rules
     /// If there are already N suspects among the neighbors of the cell,
     /// then the remaining neighbors are all clean and can be revealed.
     /// </summary>
-    public class LackOfRemainingAdjacentBombsRule : IRule
+    public class LackOfRemainingAdjacentBombsRule : IRule, IHintRule
     {
         public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
         {
@@ -39,6 +39,14 @@ namespace Assets.Scripts.Solver.Rules
             }
 
             return false;
+        }
+
+        public Hint GenerateHint(BoardCell consideredCell)
+        {
+            var cell = consideredCell;
+            return new Hint(cell, Data.Hint.HintTypes.MaxAdjacentBombsReached,
+                "Consider that there can not be any more bombs around " + cell.ToString() +
+                " than you already found.", cell);
         }
     }
 }
