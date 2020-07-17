@@ -231,32 +231,16 @@ namespace Assets.Scripts.Solver
         /// <returns></returns>
         private bool ConsiderTheLackOfRemainingAdjacentBombs(BoardCell cell, bool modifyBoard)
         {
-            // only perform this check for cells that are not bombs (i.E. cell.State!=Suspect).
-            // Because bombs carry no information about their neighbours
-            // only perform this check for cells that we know the adjacent bomb count of (i.e. cell.State==Revealed)
-            // only perform this check if there are unrevealed unsuspect neighbors => skip if there are only revealed neighbors
-            if (cell.State != CellState.Revealed ||
-                board.GetAdjacentCells(cell.PosX, cell.PosY, cell.PosZ)
-                    .All(c => c.State == CellState.Revealed || c.State == CellState.Suspect)
-            )
+            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
+            bool computationAdvanced = new LackOfRemainingAdjacentBombsRule().Consider(this.board, cell, report);
+            if (modifyBoard)
             {
-                return false;
+                report.Where(c => c.TargetState == CellState.Revealed).Distinct()
+                    .ForAll(cc => 
+                        board.Reveal(board[cc.PosX, cc.PosY, cc.PosZ]
+                        ));
             }
-
-            int numSurroundingSuspects = board.CountNeighbors(cell, n => n.State == CellState.Suspect);
-            if (numSurroundingSuspects == cell.AdjacentBombCount)
-            {
-                board.ForEachNeighbor(cell, neighbor =>
-                {
-                    if (neighbor.State != CellState.Suspect && modifyBoard)
-                    {
-                        board.Reveal(neighbor);
-                    }
-                });
-                return true;
-            }
-
-            return false;
+            return computationAdvanced;
         }
 
         /// <summary>
