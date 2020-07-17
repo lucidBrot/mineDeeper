@@ -8,8 +8,6 @@ namespace Assets.Scripts.Solver.Rules
 {
     public interface IRule
     {
-        // TODO: make the board immutable in every case and return modifications instead.
-
         /// <summary>
         /// Consider this Rule.
         /// Returns True if considering this rule advances the board in any way.
@@ -24,13 +22,13 @@ namespace Assets.Scripts.Solver.Rules
         /// <returns>
         
         /// </returns>
-        bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection);
+        bool Consider(in Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection);
     }
 
     /// <summary>
     /// The IEquatable implementation entails all Coordinates AND the CellState because it is used in two cases:
     /// For Hints, the CellState must be retained when removing Duplicates to detect a problem on the user side
-    /// todo: implement that hint check
+    ///
     /// For Solving, the CellStates for the same coordinates from different considered cells will never contradict.
     /// </summary>
     public readonly struct ConsiderationReportForCell : IEquatable<ConsiderationReportForCell>

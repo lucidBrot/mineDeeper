@@ -9,7 +9,7 @@ namespace Assets.Scripts.Solver.Rules
 {
     public class TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule : IRule, IHintRule
     {
-        public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
+        public bool Consider(in Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
         {
             // by default, we found nothing
             // Could be used as output parameter, but is never used.
@@ -39,9 +39,10 @@ namespace Assets.Scripts.Solver.Rules
             foreach (BoardCell possibleBomb1 in unrevealedNeighbors)
             {
                 // would that bomb even be valid?
+                var board1 = board; // need that copy to use the board in the lambda. Whyever...
                 if (board.NeighborsOf(possibleBomb1).Where(cll => cll.State == CellState.Revealed).Any(
                     // has already enough bombs
-                    c => board.NeighborsOf(c).Count(n => (n.IsBomb && n.State == CellState.Revealed) || n.State == CellState.Suspect) >= c.AdjacentBombCount
+                    (BoardCell c) => board1.NeighborsOf(c).Count(n => (n.IsBomb && n.State == CellState.Revealed) || n.State == CellState.Suspect) >= c.AdjacentBombCount
                     ))
                 {
                     continue;
@@ -59,9 +60,10 @@ namespace Assets.Scripts.Solver.Rules
                     }
 
                     // would that bomb2 even be valid?
+                    var board2 = board;
                     if (board.NeighborsOf(possibleBomb2).Where(cll => cll.State == CellState.Revealed).Any(
                         // has already enough bombs
-                        c => board.NeighborsOf(c).Count(n => (n.State == CellState.Revealed && n.IsBomb) || n.State == CellState.Suspect) >=
+                        c => board2.NeighborsOf(c).Count(n => (n.State == CellState.Revealed && n.IsBomb) || n.State == CellState.Suspect) >=
                              c.AdjacentBombCount
                     ))
                     {

@@ -9,7 +9,7 @@ namespace Assets.Scripts.Solver.Rules
     /// </summary>
     public class AllNeighborsAreSafeRule : IRule, IHintRule
     {
-        public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
+        public bool Consider(in Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
         {
             if (cell.State != CellState.Revealed)
             {

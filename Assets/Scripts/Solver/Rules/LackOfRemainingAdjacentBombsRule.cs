@@ -11,7 +11,7 @@ namespace Assets.Scripts.Solver.Rules
     /// </summary>
     public class LackOfRemainingAdjacentBombsRule : IRule, IHintRule
     {
-        public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
+        public bool Consider(in Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
         {
             // only perform this check for cells that are not bombs (i.E. cell.State!=Suspect).
             // Because bombs carry no information about their neighbours

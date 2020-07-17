@@ -9,7 +9,7 @@ namespace Assets.Scripts.Solver.Rules
     /// </summary>
     public class AllHiddenNeighborsAreBombsRule : IRule, IHintRule
     {
-        public bool Consider(Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
+        public bool Consider(in Board board, BoardCell cell, ICollection<ConsiderationReportForCell> mutableConsiderationReportCollection)
         {
             // skip cells we know nothing of and nude cells
             if (cell.State != CellState.Revealed || cell.IsNude)
