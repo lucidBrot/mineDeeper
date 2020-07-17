@@ -245,5 +245,10 @@ namespace Assets.Scripts.Solver
             this.ShouldAbort = true;
         }
 
+        public Tuple<List<IRule>, List<IHintRule>> GetRuleListsForTesting()
+        {
+            return new Tuple<List<IRule>, List<IHintRule>>(this.rules, this.hintRules);
+        }
+
     }
 }
