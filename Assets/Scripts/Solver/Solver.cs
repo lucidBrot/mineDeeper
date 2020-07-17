@@ -29,6 +29,26 @@ namespace Assets.Scripts.Solver
         /// because we did not find the board to be solvable
         /// </summary>
         private const bool ABORTED = false;
+        
+        // This list contains all (nicely behaving, i.e. not the above) IHintRules so that they will be checked
+        // in the order they are listed here.
+        private readonly List<IHintRule> hintRules = new List<IHintRule>
+        {
+            new AllHiddenNeighborsAreBombsRule(),
+            new AllNeighborsAreSafeRule(),
+            new LackOfRemainingAdjacentBombsRule(),
+            new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(),
+        };
+        // TODO: Need to modify this list whenever the solver.Compute function is modified. Bad.
+        
+        // List of Rules to consider in order (for solving)
+        private readonly List<IRule> rules = new List<IRule>()
+        {
+            new AllHiddenNeighborsAreBombsRule(),
+            new AllNeighborsAreSafeRule(),
+            new LackOfRemainingAdjacentBombsRule(),
+            new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(),
+        };
 
         public Solver(Board board)
         {
@@ -57,15 +77,6 @@ namespace Assets.Scripts.Solver
 
         private bool Compute()
         {
-            // List of Rules to consider in order
-            List<IRule> rules = new List<IRule>()
-            {
-                new AllHiddenNeighborsAreBombsRule(),
-                new AllNeighborsAreSafeRule(),
-                new LackOfRemainingAdjacentBombsRule(),
-                new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(),
-            };
-            
             while (this.numUnfoundBombs > 0)
             {
                 var computationAdvancedThisTurn = false;
@@ -131,16 +142,6 @@ namespace Assets.Scripts.Solver
             }
 
             // heuristics from solver as hints
-            // This list contains all (nicely behaving, i.e. not the above) IHintRules so that they will be checked
-            // in the order they are listed here.
-            List<IHintRule> hintRules = new List<IHintRule>
-                {
-                    new AllHiddenNeighborsAreBombsRule(),
-                    new AllNeighborsAreSafeRule(),
-                    new LackOfRemainingAdjacentBombsRule(),
-                    new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(),
-                };
-            // TODO: Need to modify this list whenever the solver.Compute function is modified. Bad.
             foreach (BoardCell cell in solver.board.Cells)
             {
                 // if it is a revealed bomb, it's a weird case we didn't think of before. It's safer to just ignore that for now
@@ -151,7 +152,7 @@ namespace Assets.Scripts.Solver
                 Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
                 
                 // generate a Hint if possible
-                foreach (var hintRule in hintRules) {
+                foreach (var hintRule in solver.hintRules) {
                     if (solver.ConsiderTheRule(hintRule, cell, false))
                     {
                         return hintRule.GenerateHint(cell);
