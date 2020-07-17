@@ -57,6 +57,15 @@ namespace Assets.Scripts.Solver
 
         private bool Compute()
         {
+            // List of Rules to consider in order
+            List<IRule> rules = new List<IRule>()
+            {
+                new AllHiddenNeighborsAreBombsRule(),
+                new AllNeighborsAreSafeRule(),
+                new LackOfRemainingAdjacentBombsRule(),
+                new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(),
+            };
+            
             while (this.numUnfoundBombs > 0)
             {
                 var computationAdvancedThisTurn = false;
@@ -76,31 +85,17 @@ namespace Assets.Scripts.Solver
                     }
 
                     Debug.Assert(!cell.IsBomb || cell.State != CellState.Revealed);
-                    // using `if (!computationAdvancedThisTurn)` to short-circuit.
-                    // On second thought, It could be better or worse than using |= which does not short-circuit -
-                    // because if all options for one cell are checked at the same cell, caching might work better.
-                    if (!computationAdvancedThisTurn)
-                    {
-                        computationAdvancedThisTurn =
-                            SolveConsideringTheRule(new AllHiddenNeighborsAreBombsRule(), cell);
-                    }
 
-                    if (!computationAdvancedThisTurn)
+                    foreach (var rule in rules)
                     {
-                        computationAdvancedThisTurn = SolveConsideringTheRule(new AllNeighborsAreSafeRule(), cell);
-                    }
-
-                    if (!computationAdvancedThisTurn)
-                    {
-                        computationAdvancedThisTurn =
-                            SolveConsideringTheRule(new LackOfRemainingAdjacentBombsRule(), cell);
-                    }
-
-                    if (!computationAdvancedThisTurn)
-                    {
-                        // this is a more costly operation and hence should only be tried if others don't help
-                        computationAdvancedThisTurn = SolveConsideringTheRule(
-                            new TheSetOfAllOptionsForTwoBombsConsistsOfOnlyOneOptionThatIsLegalRule(), cell);
+                        // using `if (!computationAdvancedThisTurn)` to short-circuit.
+                        // On second thought, It could be better or worse than using |= which does not short-circuit -
+                        // because if all options for one cell are checked at the same cell, caching might work better.
+                        if (!computationAdvancedThisTurn)
+                        {
+                            computationAdvancedThisTurn =
+                                SolveConsideringTheRule(rule, cell);
+                        }
                     }
 
                     if (computationAdvancedThisTurn)
