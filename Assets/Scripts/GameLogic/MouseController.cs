@@ -1,16 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Data;
 using Assets.Scripts.Frontend;
 using Assets.Scripts.GameLogic;
 using Assets.Scripts.Solver;
+using Unity_Tools.Core;
 using UnityEngine;
 
 public class MouseController : MonoBehaviour
 {
     private readonly KeyCode[] focusInputs =
     {
-        KeyCode.Alpha0, KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4, 
+        KeyCode.Y, KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4, 
         KeyCode.Alpha5, KeyCode.Alpha6, KeyCode.Alpha7, KeyCode.Alpha8, KeyCode.Alpha9
     };
 
@@ -165,7 +167,8 @@ public class MouseController : MonoBehaviour
                     if (field != null)
                     {
                         var cell = field.BoardCell;
-
+                        
+                        // set cell color
                         if (!cell.Focused || cell.FocusId != i)
                         {
                             cell.Focused = true;
@@ -175,6 +178,21 @@ public class MouseController : MonoBehaviour
                         {
                             cell.Focused = false;
                         }
+                        
+                        // set color of surrounding numbers
+                        var ii = i;
+                        cell.Neighbors.Where(c => c.State == CellState.Revealed).ForAll(number =>
+                        {
+                            if (!number.Focused || number.FocusId != ii)
+                            {
+                                number.Focused = true;
+                                number.FocusId = ii;
+                            }
+                            else
+                            {
+                                number.Focused = false;
+                            }
+                        });
                     }
                 }
             }

@@ -123,6 +123,10 @@ namespace Assets.Scripts.Frontend
                 if (this.boardCell.State == CellState.Revealed)
                 {
                     this.CubeVisual.SetActive(false);
+                    if (this.boardCell != null)
+                    {
+                        this.Text.faceColor = this.GetActiveColor();
+                    }
                 }
                 else
                 {
