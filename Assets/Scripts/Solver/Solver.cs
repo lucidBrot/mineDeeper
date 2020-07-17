@@ -263,7 +263,6 @@ namespace Assets.Scripts.Solver
             IRule rule = new AllHiddenNeighborsAreBombsRule();
             bool computationAdvanced = rule.Consider(this.board, cell, report);
             
-            // todo: for paralellization, consider carefully how the unfoundBombs are updated! Best is only once, to avoid counting the same finding twice. Probably should compute it from the list instead and remove the out param.
             // Count number of found Bombs
             int numNewBombsFound = report.Distinct().Count(rep => rep.TargetState == CellState.Suspect);
             this.numUnfoundBombs -= numNewBombsFound;
@@ -297,6 +296,37 @@ namespace Assets.Scripts.Solver
                     });
             }
 
+            return computationAdvanced;
+        }
+
+        private bool ConsiderTheRule(IRule rule, BoardCell cell, bool modifyBoard)
+        {
+            ICollection<ConsiderationReportForCell> report = new List<ConsiderationReportForCell>();
+            bool computationAdvanced = rule.Consider(this.board, cell, report);
+
+            if (modifyBoard)
+            {
+                // todo: for paralellization, consider carefully how the unfoundBombs are updated! Best is only once, to avoid counting the same finding twice. Probably should compute it from the list instead and remove the out param.
+                // Count number of found Bombs
+                int numNewBombsFound = report.Distinct().Count(rep => rep.TargetState == CellState.Suspect);
+                this.numUnfoundBombs -= numNewBombsFound;
+                
+                // reduce number of Unfound Bombs
+                report.Where(c => c.TargetState == CellState.Suspect).Distinct()
+                    .ForAll(cc =>
+                    {
+                        numUnfoundBombs--;
+                        board[cc.PosX, cc.PosY, cc.PosZ].State = CellState.Suspect;
+                    });
+                
+                // reveal safe cells
+                report.Where(c => c.TargetState == CellState.Revealed).Distinct()
+                    .ForAll(cc => 
+                        board.Reveal(board[cc.PosX, cc.PosY, cc.PosZ]
+                        ));
+            }
+
+            // todo: check if some cell is in both sets (or is already set to Suspect but should be revealed according to some rule now) and generate according hint to the user.
             return computationAdvanced;
         }
         
