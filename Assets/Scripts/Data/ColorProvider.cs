@@ -9,8 +9,6 @@ namespace Assets.Scripts.Data
     {
         public Color[] NumberColors;
 
-        public Color[] MarkColors;
-
         [SerializeField]
         private GrayCloudsStyle style;
 
@@ -54,16 +52,6 @@ namespace Assets.Scripts.Data
             }
 
             return Color.white;
-        }
-
-        public static Color GetFocusColor(int key)
-        {
-            if (!CanAccessInstance || Instance.MarkColors == null || Instance.MarkColors.Length == 0)
-            {
-                return Color.black;
-            }
-
-            return Instance.MarkColors[key % Instance.MarkColors.Length];
         }
 
         protected virtual void OnStyleChanged()

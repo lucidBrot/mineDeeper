@@ -73,7 +73,7 @@ namespace Assets.Scripts.GameLogic
                     continue;
                 }
 
-                foreach (var neighbor in cell.Neighbors)
+                foreach (var neighbor in board.NeighborsOf(cell))
                 {
                     if (neighbor.State == CellState.Default)
                     {

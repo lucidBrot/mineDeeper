@@ -69,8 +69,17 @@ namespace Assets.Scripts.Data
             this.Depth = depth;
 
             this.Cells = new BoardCell[width * height * depth];
-            this.BuildBoard();
-            this.ConnectCells();
+
+            for (var x = 0; x < width; x++)
+            {
+                for (var y = 0; y < height; y++)
+                {
+                    for (var z = 0; z < depth; z++)
+                    {
+                        this[x, y, z] = new BoardCell(x, y, z);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -173,78 +182,11 @@ namespace Assets.Scripts.Data
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        
+
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private void BuildBoard()
-        {
-            for (var x = 0; x < this.Width; x++)
-            {
-                for (var y = 0; y < this.Height; y++)
-                {
-                    for (var z = 0; z < this.Depth; z++)
-                    {
-                        this[x, y, z] = new BoardCell(x, y, z);
-                    }
-                }
-            }
-        }
-
-        private void ConnectCells()
-        {
-            var cellCache = new List<BoardCell>();
-
-            for (var x = 0; x < this.Width; x++)
-            {
-                for (var y = 0; y < this.Height; y++)
-                {
-                    for (var z = 0; z < this.Depth; z++)
-                    {
-                        cellCache.Clear();
-                        this.GetNeighbors(x, y, z, cellCache);
-
-                        this[x, y, z].Neighbors = cellCache.ToArray();
-                    }
-                }
-            }
-        }
-
-        private void GetNeighbors(int x, int y, int z, List<BoardCell> output)
-        {
-            for (var a = -1; a <= 1; a++)
-            {
-                if (x + a < 0 || x + a >= this.Width)
-                {
-                    continue;
-                }
-
-                for (var b = -1; b <= 1; b++)
-                {
-                    if (b + y < 0 || b + y >= this.Height)
-                    {
-                        continue;
-                    }
-
-                    for (var c = -1; c <= 1; c++)
-                    {
-                        if (c + z < 0 || c + z >= this.Depth)
-                        {
-                            continue;
-                        }
-
-                        if (a == 0 && b == 0 && c == 0)
-                        {
-                            continue;
-                        }
-
-                        output.Add(this[a + x, b + y, c + z]);
-                    }
-                }
-            }
         }
     }
 }

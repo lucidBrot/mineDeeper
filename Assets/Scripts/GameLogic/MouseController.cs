@@ -8,12 +8,6 @@ using UnityEngine;
 
 public class MouseController : MonoBehaviour
 {
-    private readonly KeyCode[] focusInputs =
-    {
-        KeyCode.Alpha0, KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4, 
-        KeyCode.Alpha5, KeyCode.Alpha6, KeyCode.Alpha7, KeyCode.Alpha8, KeyCode.Alpha9
-    };
-
     public Camera Camera;
 
     public CameraBehaviour CameraBehaviour;
@@ -24,11 +18,9 @@ public class MouseController : MonoBehaviour
 
     public KeyCode MarkKey;
 
-    public KeyCode FocusKey;
-
     public LayerMask LayerMask;
 
-    public float RotationTriggerMarginPixels = 8f;
+    public float RotationTriggerMarginPixels = 5f;
 
     private KeyDownState keyState;
 
@@ -57,10 +49,6 @@ public class MouseController : MonoBehaviour
             {
                 keyState = KeyDownState.MarkKey;
                 HandleKeyDown();
-            }
-            else
-            {
-                this.HandleFocusInput();
             }
         }
         else
@@ -151,36 +139,6 @@ public class MouseController : MonoBehaviour
         return revelation;
     }
 
-    private void HandleFocusInput()
-    {
-        for (var i = 0; i < this.focusInputs.Length; i++)
-        {
-            var focusInput = this.focusInputs[i];
-            if (Input.GetKeyDown(focusInput))
-            {
-                var ray = this.Camera.ScreenPointToRay(Input.mousePosition);
-                if (Physics.Raycast(ray, out var hit, this.LayerMask))
-                {
-                    var field = hit.collider.GetComponentInParent<FieldVisual>();
-                    if (field != null)
-                    {
-                        var cell = field.BoardCell;
-
-                        if (!cell.Focused || cell.FocusId != i)
-                        {
-                            cell.Focused = true;
-                            cell.FocusId = i;
-                        }
-                        else
-                        {
-                            cell.Focused = false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
     private enum KeyDownState
     {
         None,
