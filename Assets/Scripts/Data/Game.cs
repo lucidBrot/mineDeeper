@@ -80,6 +80,8 @@ namespace Assets.Scripts.Data
         private Generator.Generator _lastStartedGenerator;
         public void StartNewGame()
         {
+            GameBoard = new Board(0, 0, 0);
+
             // Abort generator that is currently running
             _lastStartedGenerator?.Abort();
             // Create new generator to avoid issues with reuse after aborting - not certain if necessary.
@@ -92,7 +94,11 @@ namespace Assets.Scripts.Data
                 Board board = _lastStartedGenerator.Generate((uint) NextBoardWidth, (uint) NextBoardHeight,
                     (uint) NextBoardDepth,
                     (uint) NextBombCount);
-                MainThreadDispatch.InvokeAsync(() => { GameBoard = board;});
+
+                if (board != null)
+                {
+                    MainThreadDispatch.InvokeAsync(() => { GameBoard = board; });
+                }
             });
 
             PlayerStats = new PlayerStats();

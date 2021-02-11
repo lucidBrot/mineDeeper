@@ -3,14 +3,15 @@ using System.Linq;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
 
-using Random = UnityEngine.Random;
-
 namespace Assets.Scripts.Generator
 {
     public class Generator
     {
+        private readonly Random brandon;
+
         public Generator()
         {
+            this.brandon = new Random();
         }
 
         /// <summary>
@@ -161,7 +162,6 @@ namespace Assets.Scripts.Generator
 
         private void PlaceBombRandomlyOnBoard(Board board)
         {
-            var brandon = new System.Random();
             int posx = brandon.Next(0, board.Width);
             int posy = brandon.Next(0, board.Height);
             int posz = brandon.Next(0, board.Depth);
