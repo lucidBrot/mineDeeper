@@ -40,7 +40,14 @@ namespace Assets.Scripts.GameLogic
             this.state = CreationState.Deleted;
             Game.Instance.NewGameStarting += OnNewGameStarting;
             Game.Instance.NewGameStarted += OnNewGameStarted;
+            Game.Instance.GameLoaded += this.OnGameLoaded;
             Game.Instance.StartNewGame();
+        }
+
+        private void OnGameLoaded(object sender, EventArgs e)
+        {
+            this.DestroyGameField();
+            this.BuildGameField();
         }
 
         public static Vector3 BoardToWorldPosition(int x, int y, int z)
@@ -146,7 +153,7 @@ namespace Assets.Scripts.GameLogic
 
             var fieldMarginSize = FieldSize + Margin;
             var worldSize = new Vector3(w * fieldMarginSize.x, h * fieldMarginSize.y, d * fieldMarginSize.z);
-            var startPoint = -worldSize / 2f;
+            var startPoint = (-worldSize + fieldMarginSize) / 2f;
 
             for(var x = 0; x < w; x++)
             {

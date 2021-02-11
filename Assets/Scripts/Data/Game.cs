@@ -76,6 +76,8 @@ namespace Assets.Scripts.Data
 
         public event EventHandler<EventArgs> NewGameStarted;
 
+        public event EventHandler<EventArgs> GameLoaded;
+
         public Game()
         {
             NextBoardWidth = 10;
@@ -270,7 +272,7 @@ namespace Assets.Scripts.Data
 
         public void restoreStateFromFile(string filename)
         {
-            this.OnNewGameStarting();
+            //this.OnNewGameStarting();
 
             string serializedGame =
                 System.IO.File.ReadAllText(Path.Combine(Application.persistentDataPath, filename), Encoding.UTF8);
@@ -278,12 +280,18 @@ namespace Assets.Scripts.Data
             this.GameBoard = grep.board;
             this.PlayerStats = grep.playerStats;
 
-            this.OnNewGameStarted();
+            //this.OnNewGameStarted();
+            this.OnGameLoaded();
             
             // reset hint stuff
             TestWhetherHintStillValid();
             
             CheckIfGameFinished();
+        }
+
+        protected virtual void OnGameLoaded()
+        {
+            this.GameLoaded?.Invoke(this, EventArgs.Empty);
         }
     }
 }
