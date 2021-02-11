@@ -123,10 +123,6 @@ namespace Assets.Scripts.Frontend
                 if (this.boardCell.State == CellState.Revealed)
                 {
                     this.CubeVisual.SetActive(false);
-                    if (this.boardCell != null)
-                    {
-                        this.Text.faceColor = this.GetActiveColor();
-                    }
                 }
                 else
                 {
@@ -172,9 +168,16 @@ namespace Assets.Scripts.Frontend
 
                 if (!this.boardCell.IsNude)
                 {
-                    var colors = Data.StyleManager.Instance.NumberColors;
-                    var index = this.boardCell.AdjacentBombCount - 1;
-                    this.Text.color = index < colors.Length ? colors[index] : colors[colors.Length - 1];
+                    if (this.boardCell.Focused)
+                    {
+                        this.Text.color = Data.StyleManager.GetFocusColor(this.boardCell.FocusId);
+                    }
+                    else
+                    {
+                        var colors = Data.StyleManager.Instance.NumberColors;
+                        var index = this.boardCell.AdjacentBombCount - 1;
+                        this.Text.color = index < colors.Length ? colors[index] : colors[colors.Length - 1];
+                    }
                 }
 
                 if (this.boardCell.Highlighted)
