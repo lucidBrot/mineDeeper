@@ -188,18 +188,17 @@ namespace Assets.Scripts.GameLogic
 
             var fieldMarginSize = FieldSize + Margin; 
             var worldSize = new Vector3(w * fieldMarginSize.x, h * fieldMarginSize.y, d * fieldMarginSize.z);
-            var startPoint = -worldSize / 2f;
+            var startPoint = (-worldSize + fieldMarginSize) / 2f;
 
-            BoardEffectOrchestrator.PlayEffect(board.Cells, new SphericalGrowthTimeline(startPoint, 30f),
+            BoardEffectOrchestrator.PlayEffect(board.Cells, new SphericalGrowthTimeline(new Vector3(0, -worldSize.y, 0), 30f),
                 item => BoardVisuals.BoardToWorldPosition((BoardCell) item), item =>
                 {
                     var cell = (BoardCell) item;
-                var instance = Instantiate(Prefab);
-                instance.BoardCell = cell;
-                instance.transform.position = startPoint + new Vector3(cell.PosX * fieldMarginSize.x, cell.PosY * fieldMarginSize.y,
-                    cell.PosZ * fieldMarginSize.z);
-                instance.UpdateHullColor();
-                fieldVisuals.Add(instance);
+                    var instance = Instantiate(Prefab);
+                    instance.BoardCell = cell;
+                    instance.transform.position = startPoint + new Vector3(cell.PosX * fieldMarginSize.x, cell.PosY * fieldMarginSize.y, cell.PosZ * fieldMarginSize.z);
+                    instance.UpdateHullColor();
+                    fieldVisuals.Add(instance);
             }, this.OnVisualsCreated);
         }
 
