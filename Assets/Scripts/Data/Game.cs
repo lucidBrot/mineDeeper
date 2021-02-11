@@ -16,11 +16,9 @@ namespace Assets.Scripts.Data
     public class Game : SingletonBehaviour<Game>, INotifyPropertyChanged
     {
         private Hint _activeHint;
-
-        [SerializeField]
+        
         private Board gameBoard;
-
-        [SerializeField]
+        
         private PlayerStats playerStats;
 
         public Hint ActiveHint

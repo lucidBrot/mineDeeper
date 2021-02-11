@@ -18,13 +18,14 @@ namespace Assets.Scripts.Data
         private CellState state;
         [SerializeField]
         private bool highlighted;
+        [NonSerialized]
         private BoardCell[] neighbors;
         [SerializeField]
-        private readonly int posX;
+        private int posX;
         [SerializeField]
-        private readonly int posY;
+        private int posY;
         [SerializeField]
-        private readonly int posZ;
+        private int posZ;
         [SerializeField]
         private int adjacentBombCount;
         [SerializeField]
