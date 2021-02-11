@@ -43,7 +43,7 @@ namespace Assets.Scripts.Frontend
 
                 if (hint != null)
                 {
-                    var pos = GameManager.BoardToWorldPosition(Game.Instance.ActiveHint.ConcernedCell);
+                    var pos = BoardVisuals.BoardToWorldPosition(Game.Instance.ActiveHint.ConcernedCell);
                     Effect.transform.position = pos;
 
                     SetEffectActive(true);

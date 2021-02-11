@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Assets.Scripts.GameLogic;
+using Assets.Scripts.GameLogic.EffectTimeline;
 using JetBrains.Annotations;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity_Tools.Components;
@@ -69,6 +70,10 @@ namespace Assets.Scripts.Data
 
         public event EventHandler<ItemChangedEventArgs<Hint>> HintChanged;
 
+        public event EventHandler<EventArgs> NewGameStarting; 
+
+        public event EventHandler<EventArgs> NewGameStarted;
+
         public Game()
         {
             NextBoardWidth = 10;
@@ -81,7 +86,10 @@ namespace Assets.Scripts.Data
 
         public void StartNewGame()
         {
-            GameBoard = new Board(0, 0, 0);
+            this.OnNewGameStarting();
+
+            this.GameBoard = new Board(0, 0, 0);
+            this.PlayerStats = new PlayerStats();
 
             // Abort generator that is currently running
             _lastStartedGenerator?.Abort();
@@ -97,33 +105,9 @@ namespace Assets.Scripts.Data
 
                 if (board != null)
                 {
-                    MainThreadDispatch.InvokeAsync(() => { GameBoard = board; });
+                    MainThreadDispatch.InvokeAsync(() => { GameBoard = board; this.OnNewGameStarted();});
                 }
             });
-
-            PlayerStats = new PlayerStats();
-        }
-
-        public void StartDebugFlagsGame()
-        {
-            Board board = new Board(5, 3, 1);
-            board.SetBombState(2, 1, 0, true);
-            board.SetBombState(4, 1, 0, true);
-
-            board[1, 0, 0].State = CellState.Revealed;
-            board[1, 1, 0].State = CellState.Suspect; // wrong flag
-            board[2, 1, 0].State = CellState.Suspect; // good flag
-
-            GameBoard = board;
-            playerStats = new PlayerStats();
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void Reveal(BoardCell cell)
@@ -253,6 +237,25 @@ namespace Assets.Scripts.Data
         protected virtual void OnHintChanged(Hint newHint, Hint oldHint)
         {
             HintChanged?.Invoke(this, new ItemChangedEventArgs<Hint>(newHint, oldHint));
+        }
+
+        protected virtual void OnNewGameStarted()
+        {
+            this.NewGameStarted?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnNewGameStarting()
+        {
+            this.NewGameStarting?.Invoke(this, EventArgs.Empty);
+
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

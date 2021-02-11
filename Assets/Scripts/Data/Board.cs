@@ -155,6 +155,11 @@ namespace Assets.Scripts.Data
             this.HighlightedCell = null;
         }
 
+        public int XyzToIndex(int x, int y, int z)
+        {
+            return x + y * this.Width + z * this.Width * this.Height;
+        }
+
         public IEnumerator<BoardCell> GetEnumerator()
         {
             return ((IEnumerable<BoardCell>)Cells).GetEnumerator();

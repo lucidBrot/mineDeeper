@@ -33,7 +33,7 @@ namespace Assets.Scripts.Data
         /// <summary>
         /// It is naked, has no value and is basically useless for the game.
         /// </summary>
-        public bool IsNude => AdjacentBombCount == 0;
+        public bool IsNude => this.AdjacentBombCount == 0;
 
         public bool Highlighted
         {
