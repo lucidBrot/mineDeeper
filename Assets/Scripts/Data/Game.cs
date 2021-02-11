@@ -270,11 +270,15 @@ namespace Assets.Scripts.Data
 
         public void restoreStateFromFile(string filename)
         {
+            this.OnNewGameStarting();
+
             string serializedGame =
                 System.IO.File.ReadAllText(Path.Combine(Application.persistentDataPath, filename), Encoding.UTF8);
             GameRepresentation grep = GameSerializer.deserialize(serializedGame);
             this.GameBoard = grep.board;
             this.PlayerStats = grep.playerStats;
+
+            this.OnNewGameStarted();
             
             // reset hint stuff
             TestWhetherHintStillValid();

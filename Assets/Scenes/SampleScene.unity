@@ -9170,7 +9170,7 @@ MonoBehaviour:
   MinVerticalDistance: 1
   MinXRotation: -90
   MinYRotation: 0
-  previousTabSelection: 2
+  previousTabSelection: 0
   RestrictXRotation: 1
   RestrictYRotation: 0
   RotationSpeed: 4
