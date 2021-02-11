@@ -17,8 +17,10 @@ namespace Assets.Scripts.Data
     {
         private Hint _activeHint;
 
+        [SerializeField]
         private Board gameBoard;
 
+        [SerializeField]
         private PlayerStats playerStats;
 
         public Hint ActiveHint
