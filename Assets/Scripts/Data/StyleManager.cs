@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Data
 {
-    public class ColorProvider : SingletonBehaviour<ColorProvider>
+    public class StyleManager : SingletonBehaviour<StyleManager>
     {
         public Color[] NumberColors;
 
@@ -39,7 +39,7 @@ namespace Assets.Scripts.Data
             }
         }
 
-        public ColorProvider()
+        public StyleManager()
         {
             Style = new GrayCloudsStyle();
         }

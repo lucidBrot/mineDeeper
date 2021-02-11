@@ -69,9 +69,9 @@ namespace Assets.Scripts.Frontend
                 this.defaultFontSize = this.Text.fontSize;
             }
 
-            if (ColorProvider.CanAccessInstance)
+            if (Data.StyleManager.CanAccessInstance)
             {
-                ColorProvider.Instance.StyleChanged += this.OnStyleChanged;
+                Data.StyleManager.Instance.StyleChanged += this.OnStyleChanged;
             }
 
             this.cubeRenderer = this.CubeVisual != null ? this.CubeVisual.GetComponent<Renderer>() : null;
@@ -80,9 +80,9 @@ namespace Assets.Scripts.Frontend
 
         private void OnDisable()
         {
-            if (ColorProvider.CanAccessInstance)
+            if (Data.StyleManager.CanAccessInstance)
             {
-                ColorProvider.Instance.StyleChanged -= this.OnStyleChanged;
+                Data.StyleManager.Instance.StyleChanged -= this.OnStyleChanged;
             }
         }
 
@@ -168,7 +168,7 @@ namespace Assets.Scripts.Frontend
 
                 if (!this.boardCell.IsNude)
                 {
-                    var colors = ColorProvider.Instance.NumberColors;
+                    var colors = Data.StyleManager.Instance.NumberColors;
                     var index = this.boardCell.AdjacentBombCount - 1;
                     this.Text.color = index < colors.Length ? colors[index] : colors[colors.Length - 1];
                 }
@@ -194,10 +194,10 @@ namespace Assets.Scripts.Frontend
 
             if (this.boardCell.Focused)
             {
-                return ColorProvider.GetFocusColor(this.boardCell.FocusId);
+                return Data.StyleManager.GetFocusColor(this.boardCell.FocusId);
             }
 
-            return ColorProvider.GetCubeColor(this.transform.position);
+            return Data.StyleManager.GetCubeColor(this.transform.position);
         }
     }
 }

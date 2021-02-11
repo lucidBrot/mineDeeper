@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
+using Debug = UnityEngine.Debug;
 
 namespace Assets.Scripts.Generator
 {
@@ -109,10 +111,12 @@ namespace Assets.Scripts.Generator
 
             if (this.ShouldAbort)
             {
+                Debug.Log($"Aborted map generation after {tries} rounds.");
                 solver.Abort();
                 return ABORTED;
             }
 
+            Debug.Log($"Generated new map in {tries} rounds.");
             board.ResetCellStates();
             // board.Reveal(board[seedCoordTuple.Item1, seedCoordTuple.Item2, seedCoordTuple.Item3]);
             var (a, b, c) = seedCoordTuple;
