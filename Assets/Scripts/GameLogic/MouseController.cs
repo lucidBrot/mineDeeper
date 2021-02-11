@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Data;
 using Assets.Scripts.Frontend;
 using Assets.Scripts.GameLogic;
 using Assets.Scripts.Solver;
+using Unity_Tools.Core;
 using UnityEngine;
 
 public class MouseController : MonoBehaviour
@@ -165,16 +167,31 @@ public class MouseController : MonoBehaviour
                     if (field != null)
                     {
                         var cell = field.BoardCell;
-
+                        
+                        // set cell color
                         if (!cell.Focused || cell.FocusId != i)
                         {
                             cell.Focused = true;
                             cell.FocusId = i;
+                            // set color of surrounding numbers
+                            var ii = i;
+                            cell.Neighbors.Where(c => c.State == CellState.Revealed).ForAll(number =>
+                            {
+                                number.Focused = true;
+                                number.FocusId = ii;
+                            });
                         }
                         else
                         {
                             cell.Focused = false;
+                            // set color of surrounding numbers off
+                            var ii = i;
+                            cell.Neighbors.Where(c => c.State == CellState.Revealed).ForAll(number =>
+                            {
+                                number.Focused = false;
+                            });
                         }
+                        
                     }
                 }
             }
