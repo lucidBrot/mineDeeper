@@ -90,7 +90,6 @@ namespace Assets.Scripts.Data
             MainThreadDispatch.Initialize();
             Task task = Task.Run(() =>
             {
-                Thread.Sleep(4000);
                 Board board = _lastStartedGenerator.Generate((uint) NextBoardWidth, (uint) NextBoardHeight,
                     (uint) NextBoardDepth,
                     (uint) NextBombCount);
