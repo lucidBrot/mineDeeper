@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Assets.Scripts.GameLogic;
@@ -253,6 +255,28 @@ namespace Assets.Scripts.Data
         protected virtual void OnHintChanged(Hint newHint, Hint oldHint)
         {
             HintChanged?.Invoke(this, new ItemChangedEventArgs<Hint>(newHint, oldHint));
+        }
+
+        void saveStateToFile(string filename)
+        {
+            string serializedGame = GameSerializer.serialize(this);
+            System.IO.File.WriteAllText(
+                Path.Combine(Application.persistentDataPath, filename),
+                    serializedGame, Encoding.UTF8);
+        }
+
+        void restoreStateFromFile(string filename)
+        {
+            string serializedGame =
+                System.IO.File.ReadAllText(Path.Combine(Application.persistentDataPath, filename), Encoding.UTF8);
+            GameRepresentation grep = GameSerializer.deserialize(serializedGame);
+            this.GameBoard = grep.board;
+            this.PlayerStats = grep.playerStats;
+            
+            // reset hint stuff
+            TestWhetherHintStillValid();
+            
+            CheckIfGameFinished();
         }
     }
 }

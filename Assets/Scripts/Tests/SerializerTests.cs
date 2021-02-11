@@ -36,7 +36,6 @@ namespace Tests
             Assert.AreEqual(grep.board[1, 0, 0].IsBomb, true, "hmm...");
             Assert.AreEqual(grep.board[2, 2, 2].IsBomb, false, "heh.");
             Assert.AreEqual(grep.board[0, 1, 2].Highlighted, true, "huh...");
-
         }
         
     }
