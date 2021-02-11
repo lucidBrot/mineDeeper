@@ -257,7 +257,7 @@ namespace Assets.Scripts.Data
             HintChanged?.Invoke(this, new ItemChangedEventArgs<Hint>(newHint, oldHint));
         }
 
-        void saveStateToFile(string filename)
+        public void saveStateToFile(string filename)
         {
             string serializedGame = GameSerializer.serialize(this);
             System.IO.File.WriteAllText(
@@ -265,7 +265,7 @@ namespace Assets.Scripts.Data
                     serializedGame, Encoding.UTF8);
         }
 
-        void restoreStateFromFile(string filename)
+        public void restoreStateFromFile(string filename)
         {
             string serializedGame =
                 System.IO.File.ReadAllText(Path.Combine(Application.persistentDataPath, filename), Encoding.UTF8);
