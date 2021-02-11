@@ -1,27 +1,43 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Assets.Scripts.Data
 {
+    [Serializable]
     public class Board : IEnumerable<BoardCell>, INotifyPropertyChanged
     {
+        [SerializeField]
         private BoardCell HighlightedCell;
+        [SerializeField]
         private int flagCount;
+        [SerializeField]
         private int bombCount;
+        [SerializeField]
         private int unknownCount;
+        
+        [SerializeField]
+        private int width;
+        public int Width => width;
 
-        public int Width { get; }
+        [SerializeField]
+        private int height;
+        public int Height => height;
 
-        public int Height { get; }
+        [SerializeField]
+        private int depth;
+        public int Depth => depth;
 
-        public int Depth { get; }
+        [SerializeField]
+        private BoardCell[] cells;
+        public BoardCell[] Cells => cells;
 
-        public BoardCell[] Cells { get; }
-
+        [SerializeField]
         public int BombCount
         {
             get => bombCount;
@@ -33,6 +49,7 @@ namespace Assets.Scripts.Data
             }
         }
 
+        [SerializeField]
         public int FlagCount
         {
             get => flagCount;
@@ -44,6 +61,7 @@ namespace Assets.Scripts.Data
             }
         }
 
+        [SerializeField]
         public int UnknownCount
         {
             get => unknownCount;
@@ -64,11 +82,11 @@ namespace Assets.Scripts.Data
 
         public Board(int width, int height, int depth)
         {
-            this.Width = width;
-            this.Height = height;
-            this.Depth = depth;
+            this.width = width;
+            this.height = height;
+            this.depth = depth;
 
-            this.Cells = new BoardCell[width * height * depth];
+            this.cells = new BoardCell[width * height * depth];
             this.BuildBoard();
             this.ConnectCells();
         }
@@ -225,6 +243,21 @@ namespace Assets.Scripts.Data
                     }
                 }
             }
+        }
+
+        public void OnSerializeFinished()
+        {
+            // reconstruct static info for BoardCells "nextorderfocusnumber"
+            int maxFocusOrderNumber = Int32.MinValue;
+            foreach (BoardCell cell in cells)
+            {
+                maxFocusOrderNumber = Math.Max(maxFocusOrderNumber, cell.FocusOrderNumber);
+            }
+
+            BoardCell.SetNextFocusOrderNumberOnSerializeFinished(maxFocusOrderNumber + 1);
+            
+            // and also reconstruct each cell's neighbours
+            ConnectCells();
         }
 
         private void GetNeighbors(int x, int y, int z, List<BoardCell> output)

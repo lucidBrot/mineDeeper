@@ -38,3 +38,5 @@ sysinfo.txt
 *.asmdef
 *.idea
 Packages/packages-lock.json
+
+ignore

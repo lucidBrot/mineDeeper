@@ -9,26 +9,51 @@ using UnityEngine;
 
 namespace Assets.Scripts.Data
 {
+    [Serializable]
     public class BoardCell
     {
         private static int nextFocusOrderNumber = 0;
 
+        [SerializeField]
         private CellState state;
+        [SerializeField]
         private bool highlighted;
+        [NonSerialized]
         private BoardCell[] neighbors;
+        [SerializeField]
+        private int posX;
+        [SerializeField]
+        private int posY;
+        [SerializeField]
+        private int posZ;
+        [SerializeField]
+        private int adjacentBombCount;
+        [SerializeField]
+        private bool isBomb;
+        [SerializeField]
+        private bool focused;
+        [SerializeField]
+        private int focusColorId;
+        [SerializeField]
+        private int focusOrderNumber;
 
-        /// <summary>
-        /// My summary.
-        /// </summary>
-        public int PosX { get; }
+        public int PosX => posX;
 
-        public int PosY { get; }
+        public int PosY => posY;
 
-        public int PosZ { get; }
+        public int PosZ => posZ;
 
-        public int AdjacentBombCount { get; set; }
+        public int AdjacentBombCount
+        {
+            get => adjacentBombCount;
+            set => adjacentBombCount = value;
+        }
 
-        public bool IsBomb { get; set; }
+        public bool IsBomb
+        {
+            get => isBomb;
+            set => isBomb = value;
+        }
 
         /// <summary>
         /// It is naked, has no value and is basically useless for the game.
@@ -46,11 +71,23 @@ namespace Assets.Scripts.Data
             }
         }
 
-        public bool Focused { get; private set; }
+        public bool Focused
+        {
+            get => focused;
+            private set => focused = value;
+        }
 
-        public int FocusColorId { get; private set; }
+        public int FocusColorId
+        {
+            get => focusColorId;
+            private set => focusColorId = value;
+        }
 
-        public int FocusOrderNumber { get; private set; }
+        public int FocusOrderNumber
+        {
+            get => focusOrderNumber;
+            private set => focusOrderNumber = value;
+        }
 
         public CellState State
         {
@@ -82,9 +119,9 @@ namespace Assets.Scripts.Data
 
         public BoardCell(int posX, int posY, int posZ)
         {
-            this.PosX = posX;
-            this.PosY = posY;
-            this.PosZ = posZ;
+            this.posX = posX;
+            this.posY = posY;
+            this.posZ = posZ;
 
             AdjacentBombCount = 0;
             IsBomb = false;
@@ -144,6 +181,11 @@ namespace Assets.Scripts.Data
         {
             StringBuilder b = new StringBuilder("Cell(");
             return b.Append(PosX).Append(", ").Append(PosY).Append(", ").Append(PosZ).Append(")").ToString();
+        }
+        
+        public static void SetNextFocusOrderNumberOnSerializeFinished( int num)
+        {
+            nextFocusOrderNumber = num;
         }
     }
 

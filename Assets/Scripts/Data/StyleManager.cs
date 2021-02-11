@@ -63,7 +63,7 @@ namespace Assets.Scripts.Data
                 return Color.black;
             }
 
-            return Instance.MarkColors[key % Instance.MarkColors.Length];
+            return Instance.MarkColors[(key-1) % Instance.MarkColors.Length];
         }
 
         protected virtual void OnStyleChanged()

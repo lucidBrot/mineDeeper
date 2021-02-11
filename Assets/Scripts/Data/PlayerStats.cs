@@ -1,12 +1,17 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Assets.Scripts.Data
 {
+    [Serializable]
     public class PlayerStats : INotifyPropertyChanged
     {
+        [SerializeField]
         private int numHintsRequested;
+        [SerializeField]
         private int numBombsExploded;
 
         public int NumBombsExploded
