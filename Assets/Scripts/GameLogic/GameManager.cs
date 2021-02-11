@@ -117,7 +117,7 @@ namespace Assets.Scripts.GameLogic
                         instance.BoardCell = cell;
                         instance.transform.position = startPoint + new Vector3(x * fieldMarginSize.x, y * fieldMarginSize.y,
                                                           z * fieldMarginSize.z);
-                        instance.UpdateColor();
+                        instance.UpdateHullColor();
                         fieldVisuals.Add(instance);
                     }
                 }

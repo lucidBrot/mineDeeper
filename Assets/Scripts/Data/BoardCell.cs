@@ -9,12 +9,12 @@ using UnityEngine;
 
 namespace Assets.Scripts.Data
 {
-    public class BoardCell : INotifyPropertyChanged
+    public class BoardCell
     {
+        private static int nextFocusOrderNumber = 0;
+
         private CellState state;
         private bool highlighted;
-        private bool focused;
-        private int focusId;
         private BoardCell[] neighbors;
 
         /// <summary>
@@ -42,50 +42,37 @@ namespace Assets.Scripts.Data
             {
                 if (value == highlighted) return;
                 highlighted = value;
-                OnPropertyChanged();
+                this.VisualStateChangedFlag = true;
             }
         }
 
-        public bool Focused
-        {
-            get => this.focused;
-            set
-            {
-                if (value == this.focused)
-                {
-                    return;
-                }
+        public bool Focused { get; private set; }
 
-                this.focused = value;
-                this.OnPropertyChanged();
-            }
-        }
+        public int FocusColorId { get; private set; }
 
-        public int FocusId
-        {
-            get => this.focusId;
-            set
-            {
-                if (value.Equals(this.focusId))
-                {
-                    return;
-                }
-
-                this.focusId = value;
-                this.OnPropertyChanged();
-            }
-        }
+        public int FocusOrderNumber { get; private set; }
 
         public CellState State
         {
             get => state;
             set
             {
-                if (value == state) return;
+                if (value == state)
+                {
+                    return;
+                }
+
                 state = value;
-                OnPropertyChanged();
+                this.VisualStateChangedFlag = true;
+
+                if (this.Focused)
+                {
+                    this.SetFocus(-1);
+                }
             }
         }
+
+        public bool VisualStateChangedFlag { get; set; }
 
         public BoardCell[] Neighbors
         {
@@ -105,6 +92,34 @@ namespace Assets.Scripts.Data
             this.neighbors = Array.Empty<BoardCell>();
         }
 
+        public void SetFocus(int focusColorId)
+        {
+            if (focusColorId < 0)
+            {
+                if (!this.Focused)
+                {
+                    return;
+                }
+
+                this.Focused = false;
+                this.FocusColorId = -1;
+                this.FocusOrderNumber = -1;
+            }
+            else
+            {
+                this.Focused = true;
+                this.FocusColorId = focusColorId;
+                this.FocusOrderNumber = nextFocusOrderNumber++;
+            }
+            
+            foreach (var neighbor in this.neighbors)
+            {
+                neighbor.VisualStateChangedFlag = true;
+            }
+
+            this.VisualStateChangedFlag = true;
+        }
+        
         public void ToggleMarking()
         {
             switch (State)
@@ -123,14 +138,6 @@ namespace Assets.Scripts.Data
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public override string ToString()

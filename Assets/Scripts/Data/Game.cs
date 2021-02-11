@@ -78,6 +78,7 @@ namespace Assets.Scripts.Data
         }
 
         private Generator.Generator _lastStartedGenerator;
+
         public void StartNewGame()
         {
             GameBoard = new Board(0, 0, 0);

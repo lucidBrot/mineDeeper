@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Assets.Scripts.Data;
 using Assets.Scripts.GameLogic;
@@ -41,18 +42,8 @@ namespace Assets.Scripts.Frontend
                     return;
                 }
 
-                if (this.boardCell != null)
-                {
-                    this.boardCell.PropertyChanged -= this.OnBoardCellPropertyChanged;
-                }
-
                 this.boardCell = value;
-
-                if (this.boardCell != null)
-                {
-                    this.boardCell.PropertyChanged += this.OnBoardCellPropertyChanged;
-                    this.UpdateVisual();
-                }
+                this.UpdateVisual();
             }
         }
 
@@ -86,29 +77,45 @@ namespace Assets.Scripts.Frontend
             }
         }
 
-        private void OnStyleChanged()
+        private void Update()
         {
-            this.UpdateColor();
+            if (this.boardCell.VisualStateChangedFlag)
+            {
+                this.boardCell.VisualStateChangedFlag = false;
+                this.UpdateVisual();
+            }
         }
 
-        public void UpdateColor()
+        private void OnStyleChanged()
+        {
+            this.UpdateHullColor();
+        }
+
+        public void UpdateHullColor()
         {
             if (this.cubeRenderer == null)
             {
                 return;
             }
 
-            var color = this.GetActiveColor();
+            Color color;
+
+            if (this.boardCell != null && this.boardCell.Highlighted)
+            {
+                color = Color.yellow;
+            }
+            else if (this.boardCell != null && this.boardCell.Focused)
+            {
+                color = Data.StyleManager.GetFocusColor(this.boardCell.FocusColorId);
+            }
+            else
+            {
+                color = Data.StyleManager.GetCubeColor(this.transform.position);
+            }
 
             this.cubeRenderer.GetPropertyBlock(this.matPropBlock);
             this.matPropBlock.SetColor("_Color", color);
             this.cubeRenderer.SetPropertyBlock(this.matPropBlock);
-
-        }
-
-        private void OnBoardCellPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            this.UpdateVisual();
         }
 
         private void UpdateVisual()
@@ -144,7 +151,7 @@ namespace Assets.Scripts.Frontend
                         }
                     }
 
-                    this.UpdateColor();
+                    this.UpdateHullColor();
                 }
             }
             
@@ -168,43 +175,52 @@ namespace Assets.Scripts.Frontend
 
                 if (!this.boardCell.IsNude)
                 {
-                    if (this.boardCell.Focused)
+                    if (!this.boardCell.Highlighted)
                     {
-                        this.Text.color = Data.StyleManager.GetFocusColor(this.boardCell.FocusId);
+                        if (this.GetNeighborFocusColor(out var neighborFocusColor))
+                        {
+                            this.Text.color = neighborFocusColor;
+                        }
+                        else
+                        {
+                            var colors = Data.StyleManager.Instance.NumberColors;
+                            var index = this.boardCell.AdjacentBombCount - 1;
+                            this.Text.color = index < colors.Length ? colors[index] : colors[colors.Length - 1];
+                        }
+
+                        this.Text.fontSize = this.defaultFontSize;
                     }
                     else
                     {
-                        var colors = Data.StyleManager.Instance.NumberColors;
-                        var index = this.boardCell.AdjacentBombCount - 1;
-                        this.Text.color = index < colors.Length ? colors[index] : colors[colors.Length - 1];
+                        this.Text.color = Color.yellow;
+                        this.Text.fontSize = 1.5f * this.defaultFontSize;
                     }
-                }
-
-                if (this.boardCell.Highlighted)
-                {
-                    this.Text.color = Color.yellow;
-                    this.Text.fontSize = 1.5f * this.defaultFontSize;
-                }
-                else
-                {
-                    this.Text.fontSize = this.defaultFontSize;
                 }
             }
         }
 
-        private Color GetActiveColor()
+        private bool GetNeighborFocusColor(out Color color)
         {
-            if (this.boardCell != null && this.boardCell.Highlighted)
+            var maxColorId = -1;
+            var maxOrder = -1;
+
+            foreach (var neighbor in this.boardCell.Neighbors)
             {
-                return Color.yellow;
+                if (neighbor.Focused && neighbor.State != CellState.Revealed && neighbor.FocusOrderNumber > maxOrder)
+                {
+                    maxOrder = neighbor.FocusOrderNumber;
+                    maxColorId = neighbor.FocusColorId;
+                }
             }
 
-            if (this.boardCell != null && this.boardCell.Focused)
+            if (maxOrder >= 0)
             {
-                return Data.StyleManager.GetFocusColor(this.boardCell.FocusId);
+                color = Data.StyleManager.GetFocusColor(maxColorId);
+                return true;
             }
 
-            return Data.StyleManager.GetCubeColor(this.transform.position);
+            color = Color.black;
+            return false;
         }
     }
 }
